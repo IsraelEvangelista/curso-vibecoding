@@ -1,6 +1,7 @@
 import {
   User,
   Lesson,
+  LessonScore,
   QuizQuestion,
   QuizAttempt,
   RankingEntry,
@@ -105,7 +106,7 @@ const mockQuizAttempts: QuizAttempt[] = [
 // Mock de Aulas
 export const mockLessons: Lesson[] = [
   {
-    id: 'lesson1',
+    id: 'aula1',
     title: 'Aula 01: Fundamentos do Vibe Coding & Riscos',
     description: 'Introdução ao Vibe Coding, ecossistema de ferramentas e boas práticas de segurança.',
     order: 1,
@@ -145,7 +146,7 @@ export const mockLessons: Lesson[] = [
     }
   },
   {
-    id: 'lesson2',
+    id: 'aula2',
     title: 'Aula 02: Arquitetura de Agente & Engenharia de Contexto',
     description: 'Estrutura de agentes, engenharia de contexto vs. prompts e introdução ao MCP.',
     order: 2,
@@ -185,7 +186,7 @@ export const mockLessons: Lesson[] = [
     }
   },
   {
-    id: 'lesson3',
+    id: 'aula3',
     title: 'Aula 03: LLMs para Vibe Coding (foco em GLM 4.6)',
     description: 'Comparação de modelos, critérios de seleção e demonstrações práticas.',
     order: 3,
@@ -217,6 +218,119 @@ export const mockLessons: Lesson[] = [
       examples: []
     }
   }
+];
+
+export const mockLessonScores: LessonScore[] = [
+  {
+    id: 'score-aula1',
+    lessonId: 'aula1',
+    order: 1,
+    title: 'Fundamentos do Vibe Coding & Riscos',
+    presenceScore: 10,
+    quizScore: 8.5,
+    challengeScore: 9.2,
+    completed: true,
+    updatedAt: '2025-01-10T09:00:00Z',
+  },
+  {
+    id: 'score-aula2',
+    lessonId: 'aula2',
+    order: 2,
+    title: 'Arquitetura de Agente & Engenharia de Contexto',
+    presenceScore: 10,
+    quizScore: 8,
+    challengeScore: 8.7,
+    completed: true,
+    updatedAt: '2025-01-12T09:00:00Z',
+  },
+  {
+    id: 'score-aula3',
+    lessonId: 'aula3',
+    order: 3,
+    title: 'LLMs para Vibe Coding',
+    presenceScore: 9.5,
+    quizScore: 7.8,
+    challengeScore: 8,
+    completed: true,
+    updatedAt: '2025-01-15T09:00:00Z',
+  },
+  {
+    id: 'score-aula4',
+    lessonId: 'aula4',
+    order: 4,
+    title: 'Ambientes TRAE Solo & CLIs',
+    presenceScore: 9.2,
+    quizScore: 7.5,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-18T09:00:00Z',
+  },
+  {
+    id: 'score-aula5',
+    lessonId: 'aula5',
+    order: 5,
+    title: 'Boas Práticas & BMAD/PRD',
+    presenceScore: 8.8,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-22T09:00:00Z',
+  },
+  {
+    id: 'score-aula6',
+    lessonId: 'aula6',
+    order: 6,
+    title: 'Projeto Dirigido I',
+    presenceScore: 0,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-25T09:00:00Z',
+  },
+  {
+    id: 'score-aula7',
+    lessonId: 'aula7',
+    order: 7,
+    title: 'Projeto Dirigido II',
+    presenceScore: 0,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-25T09:00:00Z',
+  },
+  {
+    id: 'score-aula8',
+    lessonId: 'aula8',
+    order: 8,
+    title: 'Integração Supabase & Deploy',
+    presenceScore: 0,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-25T09:00:00Z',
+  },
+  {
+    id: 'score-aula9',
+    lessonId: 'aula9',
+    order: 9,
+    title: 'Observabilidade Inteligente',
+    presenceScore: 0,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-25T09:00:00Z',
+  },
+  {
+    id: 'score-aula10',
+    lessonId: 'aula10',
+    order: 10,
+    title: 'Encerramento & Vibe Challenges',
+    presenceScore: 0,
+    quizScore: 0,
+    challengeScore: 0,
+    completed: false,
+    updatedAt: '2025-01-25T09:00:00Z',
+  },
 ];
 
 // Mock de Ranking
@@ -263,7 +377,7 @@ export const mockForumTopics: ForumTopic[] = [
     title: 'Dúvida sobre configuração do Supabase',
     content: 'Estou com dificuldades para configurar as policies no Supabase. Alguém pode ajudar?',
     author: mockUsers[0],
-    lessonId: 'lesson1',
+    lessonId: 'aula1',
     replies: [
       {
         id: 'reply1',
@@ -291,7 +405,7 @@ export const mockForumTopics: ForumTopic[] = [
     title: 'Compartilhando meu AGENTS.md para feedback',
     content: 'Pessoal, desenvolvi um AGENTS.md para um projeto de e-commerce e gostaria de feedback.',
     author: mockUsers[2],
-    lessonId: 'lesson2',
+    lessonId: 'aula2',
     replies: [
       {
         id: 'reply3',
@@ -386,6 +500,6 @@ export const mockCurrentUser: User = mockUsers[0]; // Ana Silva
 // Mock de estados de presença
 export const mockPresenceStatus = {
   isEnabled: true,
-  lessonId: 'lesson1',
+  lessonId: 'aula1',
   expiresAt: '2024-03-15T23:59:59Z'
 };

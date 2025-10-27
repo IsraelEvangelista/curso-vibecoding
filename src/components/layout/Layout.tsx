@@ -11,10 +11,10 @@ export function Layout({ children, showSidebar = false }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-y-auto">
       <Header />
 
-      <div className="flex">
+      <div className="flex pt-16">
         {showSidebar && (
           <Sidebar
             isOpen={isSidebarOpen}

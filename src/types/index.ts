@@ -50,6 +50,18 @@ export interface QuizAttempt {
   answers: number[];
 }
 
+export interface LessonScore {
+  id: string;
+  lessonId: string;
+  order: number;
+  title: string;
+  presenceScore: number; // 0-10
+  quizScore: number; // 0-10
+  challengeScore: number; // 0-10
+  completed: boolean;
+  updatedAt: string;
+}
+
 export interface Challenge {
   id: string;
   title: string;
@@ -155,4 +167,119 @@ export interface NavigationItem {
   icon: string;
   requiredRole?: UserRole;
   isExternal?: boolean;
+}
+
+// Sistema de Slides
+export interface Slide {
+  id: string;
+  title: string;
+  content: string;
+  type: "text" | "code" | "image" | "video";
+  order: number;
+}
+
+export interface SlideDeck {
+  id: string;
+  lessonId: string;
+  title: string;
+  slides: Slide[];
+  currentSlideIndex: number;
+}
+
+export interface SlideHeaderProps {
+  slideDeck: SlideDeck;
+  onPrevious: () => void;
+  onNext: () => void;
+  onExit: () => void;
+  onNavigateToQuiz: () => void;
+  onNavigateToChallenge: () => void;
+  canGoNext: boolean;
+  canGoPrevious: boolean;
+}
+
+export interface SlideViewerProps {
+  slideDeck: SlideDeck;
+  onSlideChange: (index: number) => void;
+  onExit: () => void;
+  onNavigateToQuiz: () => void;
+  onNavigateToChallenge: () => void;
+}
+
+// Sistema de Quiz - Tipos Adicionais
+export interface QuizRound {
+  id: string;
+  title: string;
+  questions: QuizQuestion[];
+  maxAttempts: number;
+  attempts: QuizRoundAttempt[];
+  isLocked: boolean;
+}
+
+export interface QuizRoundAttempt {
+  id: string;
+  roundId: string;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  completedAt: string;
+  answers: number[];
+  timeSpent: number; // em segundos
+}
+
+export interface QuizState {
+  currentRound: QuizRound | null;
+  currentQuestionIndex: number;
+  answers: number[];
+  isCompleted: boolean;
+  startTime: number;
+  timeSpent: number;
+}
+
+export interface QuizPageProps {
+  lessonId: string;
+  quiz: Quiz;
+  onExit: () => void;
+  onNavigateToSlides: () => void;
+  onNavigateToChallenge: () => void;
+}
+
+export interface QuizQuestionViewerProps {
+  round: QuizRound;
+  questionIndex: number;
+  answers: number[];
+  onAnswerChange: (questionIndex: number, answerIndex: number) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  onComplete: () => void;
+  onExit: () => void;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  isLastQuestion: boolean;
+}
+
+export interface QuizHeaderProps {
+  round: QuizRound;
+  questionIndex: number;
+  answers: number[];
+  onPrevious: () => void;
+  onNext: () => void;
+  onComplete?: () => void;
+  onExit: () => void;
+  canGoPrevious: boolean;
+  canGoNext: boolean;
+  isLastQuestion: boolean;
+  timeSpent: number;
+}
+
+export interface QuizResultModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  timeSpent: number;
+  passed: boolean;
+  onRetry: () => void;
+  onExit: () => void;
+  roundTitle: string;
 }

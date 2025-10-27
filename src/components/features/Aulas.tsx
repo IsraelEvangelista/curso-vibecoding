@@ -1,14 +1,35 @@
-import { Card, Button } from "@/components/ui";
+import { Card, Button, Modal } from "@/components/ui";
 import { BookOpen, Award, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { Lesson } from "@/types";
 
-const ementaLessons = [
+const ementaLessons: Lesson[] = [
   {
     id: "aula1",
     order: 1,
     title: "Aula 01 – Fundamentos do Vibe Coding & Riscos",
     description:
       "Definição de Vibe Coding;Panorama de ferramentas:|Lovable|n8n|Supabase|Z.ai;Principais riscos/boas práticas:|Secrets|Lock-in|Shadow AI|Governança",
+    isLocked: false,
+    duration: "45 min",
+    content: {
+      explanation: ["Conceitos fundamentais do Vibe Coding", "Ferramentas essenciais", "Boas práticas de segurança"],
+      examples: ["Exemplo prático de configuração", "Caso de uso real"]
+    },
+    quiz: {
+      id: "quiz1",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge1",
+      title: "Desafio Fundamentos",
+      description: "Implementar um projeto básico",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de solução"]
+    }
   },
   {
     id: "aula2",
@@ -16,6 +37,25 @@ const ementaLessons = [
     title: "Aula 02 – Arquitetura de Agente & Engenharia de Contexto",
     description:
       "Agente vs. LLM;Arquitetura de agente:|LLM|Memória/cache|Tools|Contexto;Engenharia de Prompt vs. Engenharia de Contexto;MCP e demo n8n",
+    isLocked: false,
+    duration: "50 min",
+    content: {
+      explanation: ["Arquitetura de agentes", "Engenharia de contexto"],
+      examples: ["Exemplo de agente", "Demo n8n"]
+    },
+    quiz: {
+      id: "quiz2",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge2",
+      title: "Desafio Arquitetura",
+      description: "Criar um agente funcional",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de implementação"]
+    }
   },
   {
     id: "aula3",
@@ -23,6 +63,25 @@ const ementaLessons = [
     title: "Aula 03 – LLMs para Vibe Coding (foco em GLM 4.6)",
     description:
       "Comparação de modelos:|Janela de contexto|Preço|Latência|Qualidade;APIs e demonstrações em UIs web;Critérios de escolha",
+    isLocked: false,
+    duration: "40 min",
+    content: {
+      explanation: ["Comparação de LLMs", "APIs e integrações"],
+      examples: ["Demo UI web", "Benchmark"]
+    },
+    quiz: {
+      id: "quiz3",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge3",
+      title: "Desafio LLM",
+      description: "Integrar múltiplos modelos",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de API"]
+    }
   },
   {
     id: "aula4",
@@ -30,6 +89,25 @@ const ementaLessons = [
     title: "Aula 04 – Ambientes: TRAE Solo, Warp + CLIs (Claude Code & Kilo Code)",
     description:
       "Setup guiado:|IDE|CLIs;Integração com editor/Zed;Micro-benchmark:|Prompts|Tarefas de código",
+    isLocked: false,
+    duration: "55 min",
+    content: {
+      explanation: ["Configuração de ambiente", "Ferramentas CLI"],
+      examples: ["Setup completo", "Benchmark"]
+    },
+    quiz: {
+      id: "quiz4",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge4",
+      title: "Desafio Ambiente",
+      description: "Configurar ambiente completo",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de setup"]
+    }
   },
   {
     id: "aula5",
@@ -37,6 +115,25 @@ const ementaLessons = [
     title: "Aula 05 – Boas Práticas, Git/GitHub & BMAD (PRD)",
     description:
       "Fluxo Git/SSH/PR;Segurança e LGPD:|.env|gitignore|Dados sintéticos;PRD com BMAD;Critérios de aceite",
+    isLocked: false,
+    duration: "45 min",
+    content: {
+      explanation: ["Git e GitHub", "Segurança", "BMAD"],
+      examples: ["Fluxo completo", "PRD exemplo"]
+    },
+    quiz: {
+      id: "quiz5",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge5",
+      title: "Desafio Git",
+      description: "Implementar fluxo Git completo",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de PR"]
+    }
   },
   {
     id: "aula6",
@@ -44,6 +141,25 @@ const ementaLessons = [
     title: "Aula 06 – Projeto Dirigido (Parte I): do PRD a épicos/tarefas",
     description:
       "Refino do PRD;Decomposição em épicos/tarefas;Priorização;Organização do board de trabalho",
+    isLocked: false,
+    duration: "60 min",
+    content: {
+      explanation: ["Decomposição de projetos", "Priorização"],
+      examples: ["Board exemplo", "Épicos"]
+    },
+    quiz: {
+      id: "quiz6",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge6",
+      title: "Desafio Planejamento",
+      description: "Criar plano completo",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de board"]
+    }
   },
   {
     id: "aula7",
@@ -51,6 +167,25 @@ const ementaLessons = [
     title: "Aula 07 – Projeto Dirigido (Parte II): implementação assistida por IA",
     description:
       "Implementação com CLIs + GLM 4.6;Geração de testes;Observabilidade mínima;Modelagem de dados",
+    isLocked: false,
+    duration: "65 min",
+    content: {
+      explanation: ["Implementação assistida", "Testes", "Observabilidade"],
+      examples: ["Código exemplo", "Testes exemplo"]
+    },
+    quiz: {
+      id: "quiz7",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge7",
+      title: "Desafio Implementação",
+      description: "Implementar projeto completo",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de código"]
+    }
   },
   {
     id: "aula8",
@@ -58,14 +193,72 @@ const ementaLessons = [
     title: "Aula 08 – Integração ao Supabase & Deploy",
     description:
       "Modelagem/tabelas/policies/RLS no Supabase;Boas práticas:|.env|Logs;Deploy:|Vercel|Render",
+    isLocked: false,
+    duration: "50 min",
+    content: {
+      explanation: ["Supabase", "Deploy", "Boas práticas"],
+      examples: ["Setup Supabase", "Deploy exemplo"]
+    },
+    quiz: {
+      id: "quiz8",
+      questions: [],
+      maxAttempts: 3,
+      attempts: []
+    },
+    challenge: {
+      id: "challenge8",
+      title: "Desafio Deploy",
+      description: "Fazer deploy completo",
+      requirements: ["Requisito 1", "Requisito 2"],
+      examples: ["Exemplo de deploy"]
+    }
   },
-] as const;
+];
 
 export function Aulas() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const navigate = useNavigate();
+
+  // Função para abrir o modal com a aula selecionada
+  const handleOpenModal = (lesson: Lesson) => {
+    setSelectedLesson(lesson);
+    setModalOpen(true);
+  };
+
+  // Função para fechar o modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedLesson(null);
+  };
+
+  // Função para lidar com a navegação
+  const handleNavigate = (section: "content" | "quiz" | "challenge") => {
+    if (!selectedLesson) return;
+
+    const { id, title } = selectedLesson;
+    console.log(`Navegando para ${section} da aula:`, title);
+
+    // Fecha o modal antes de navegar para garantir restauração do scroll
+    handleCloseModal();
+    
+    // Navegação real para as páginas
+    switch (section) {
+      case "content":
+        navigate(`/aula/${id}`);
+        break;
+      case "quiz":
+        navigate(`/aula/${id}/quiz`);
+        break;
+      case "challenge":
+        navigate(`/aula/${id}/desafio`);
+        break;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white dark:bg-[#000000] px-4 py-8 sm:px-6 lg:px-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
         {/* Cabeçalho */}
         <div className="mb-8">
@@ -120,7 +313,12 @@ export function Aulas() {
                       )}
                     </Button>
 
-                    <Button className="btn-neon">Entrar na Aula</Button>
+                    <Button
+                      className="btn-neon"
+                      onClick={() => handleOpenModal(lesson)}
+                    >
+                      Entrar na Aula
+                    </Button>
                   </div>
                 </div>
 
@@ -186,6 +384,16 @@ export function Aulas() {
             </Card>
           ))}
         </div>
+
+        {/* Modal */}
+        {selectedLesson && (
+          <Modal
+            isOpen={modalOpen}
+            onClose={handleCloseModal}
+            lesson={selectedLesson}
+            onNavigate={handleNavigate}
+          />
+        )}
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ export function Comunidade() {
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white dark:bg-[#000000] px-4 py-8 sm:px-6 lg:px-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="mb-8">

@@ -67,10 +67,7 @@ export function Header() {
     setTheme(newTheme);
     applyTheme(newTheme);
     setIsThemeMenuOpen(false);
-    // Recarrega para garantir que todos os componentes reajam ao novo tema
-    if (typeof window !== "undefined") {
-      window.location.reload();
-    }
+    // Não recarrega mais - o tema é aplicado dinamicamente
   };
 
   const navigationItems = [
@@ -137,7 +134,7 @@ export function Header() {
 
       {themeMenu}
 
-      <header className="header-3d sticky top-0 z-[12000]">
+      <header className="header-3d fixed top-0 left-0 right-0 z-[12000]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">

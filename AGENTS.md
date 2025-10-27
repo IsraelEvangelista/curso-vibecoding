@@ -49,18 +49,20 @@
   - Links externos com rel="noopener noreferrer"
   - Proibido variáveis/imports não usados
   - Auto-fix obrigatório após edições
+  - **Rolagem vertical:** Páginas padrão devem manter `overflow-y-auto` para permitir rolagem quando necessário
 
 ### Estrutura de Arquivos Padrão
 ```
 src/
 ├── components/
-│   ├── ui/           # Componentes base (Button, Card, Avatar, etc.)
-│   ├── features/     # Features principais (Dashboard, Aulas, Ranking, Comunidade)
+│   ├── ui/           # Componentes base (Button, Card, Avatar, HelpModal, etc.)
+│   ├── features/     # Features principais (Dashboard, Aulas, Ranking, Comunidade, SlideHeader, SlideViewer)
 │   └── layout/       # Layout components (Header, Sidebar)
 ├── lib/
 │   ├── theme.ts      # Sistema de temas (applyTheme, getStoredTheme)
 │   ├── mockData.ts   # Dados mockados para desenvolvimento
 │   └── utils.ts      # Utilitários gerais
+├── pages/           # Páginas de rota (AulaSlidePage, etc.)
 ├── styles/
 │   └── globals.css   # Estilos globais + temas customizados
 ├── types/            # Definições de tipos TypeScript
@@ -75,7 +77,7 @@ src/
 - **Docs/BUGS.md:** Registro de bugs, soluções e impactos.
 - **Docs/ementa.md:** Ementa completa do curso com todas as 8 aulas estruturadas.
 
-## Estado Atual do Projeto (Última Atualização: 2025-01-26)
+## Estado Atual do Projeto (Última Atualização: 2025-01-27)
 
 ### ✅ Implementações Concluídas
 
@@ -119,6 +121,18 @@ src/
 - Botões de ação (btn-neon): "+ Novo Tópico", "+ Compartilhar Projeto"
 - Estatísticas: Tópicos no Fórum, Projetos na Galeria, Membros Ativos
 
+##### Sistema de Slides
+- **SlideHeader.tsx:** Cabeçalho personalizado com indicador de progresso X/Y, setas de navegação, botão de sair, switch de temas, botões Quiz/Desafio
+- **SlideViewer.tsx:** Visualizador principal com navegação entre slides, suporte a diferentes tipos de conteúdo
+- **AulaSlidePage.tsx:** Página principal para rota `/aula/:id` com layout completo de slides
+- **HelpModal.tsx:** Modal de ajuda com atalhos de teclado (← → Esc) e instruções de navegação
+- **Sistema de navegação completo:**
+  - Atalhos de teclado: ← (anterior), → (próximo), Esc (sair)
+  - Navegação via botões no header
+  - Indicador de progresso X/Y
+  - Botões de acesso rápido para Quiz e Desafio
+- **Classe `card-static`:** Remove efeitos hover para slides, mantendo estilo visual consistente
+
 #### 3. Sistema de Estilo Global (globals.css)
 
 ##### Botões Customizados
@@ -141,7 +155,8 @@ src/
 #### 4. Routing e Navegação
 - React Router v6 com `createBrowserRouter` + `RouterProvider`
 - Future flags habilitadas para compatibilidade v7
-- Rotas: `/`, `/aulas`, `/ranking`, `/comunidade`
+- Rotas: `/`, `/aulas`, `/ranking`, `/comunidade`, `/aula/:id`
+- Rotas planejadas: `/aula/:id/quiz`, `/aula/:id/desafio` (placeholders)
 
 #### 5. Validações e Qualidade
 - ✅ ESLint configurado e validado (0 warnings, 0 errors)
@@ -182,7 +197,7 @@ src/
 - [ ] Implementar integração com Supabase (autenticação + banco de dados)
 - [ ] Criar páginas de Quiz com sistema de pontuação
 - [ ] Implementar sistema de Desafios Práticos
-- [ ] Adicionar funcionalidade de "Entrar na Aula" (navegação para conteúdo)
+- [x] Adicionar funcionalidade de "Entrar na Aula" (navegação para conteúdo)
 - [ ] Implementar criação de tópicos no Fórum
 - [ ] Implementar upload de projetos na Galeria
 - [ ] Testes E2E com Playwright/Cypress
@@ -236,12 +251,47 @@ src/
 - `src/components/features/Aulas.tsx` - Interface de aulas
 - `src/components/features/Ranking.tsx` - Sistema de ranking
 - `src/components/features/Comunidade.tsx` - Fórum + Galeria
+- `src/components/features/SlideHeader.tsx` - Cabeçalho de slides com navegação
+- `src/components/features/SlideViewer.tsx` - Visualizador principal de slides
+- `src/components/ui/HelpModal.tsx` - Modal de ajuda com atalhos
+- `src/pages/AulaSlidePage.tsx` - Página de rota para slides
 - `src/styles/globals.css` - Temas e estilos globais
 - `src/lib/theme.ts` - Sistema de alternância de temas
 
 ---
 
 **Importante:** Este arquivo serve como orquestrador principal e deve ser mantido em sincronia com o MCP ByteRover para garantir consistência do contexto através das sessões.
+
+# Vision & MCP Instructions
+
+## Image Handling Protocol
+
+When images are provided in the conversation ([Image #N]):
+
+1. **Always use the Z.ai Vision MCP Server** for image analysis
+   - Tool: `image_analysis` from the Vision MCP
+   - Never bypass this tool for local image processing
+
+2. **Activation Triggers:**
+   - User sends screenshot or image file
+   - User pastes an image ([Image #N] appears in chat)
+   - User drags image into terminal
+
+3. **MCP Vision Usage Pattern:**
+   When: Image detected
+   Action: /mcp → Check "Vision Server: connected"
+   Then: Invoke image_analysis tool
+   Wait: For MCP response before proceeding
+
+4. **Do NOT:**
+   - Process images using base Agent vision capabilities
+   - Skip MCP invocation to save tokens
+   - Ignore MCP tool availability
+
+## MCP Servers Expected
+
+- **Web Search MCP**: For real-time data
+- **Vision MCP**: For image/video analysis
 
 [byterover-mcp]
 
