@@ -2,296 +2,156 @@
 
 ## Visão Geral do Projeto
 
-**Projeto:** Curso Vibe Coding - Plataforma de Aprendizado
-**Tecnologia:** React, Vite, TypeScript, Tailwind CSS, Supabase
-**Objetivo:** Criar uma plataforma web interativa e gamificada para o ensino de Vibe Coding, com controle de acesso, quizzes e um hub comunitário.
+**Projeto:** Curso Vibe Coding - Plataforma de Aprendizado  
+**Tecnologias:** React, Vite, TypeScript, Tailwind CSS, Supabase  
+**Objetivo:** Construir uma plataforma web interativa e gamificada para o ensino de Vibe Coding, com controle de acesso progressivo, quizzes avaliativos, desafios práticos e um hub comunitário.
 
 ### Arquitetura Técnica
-- **Frontend:** React.js com TypeScript
-- **Backend:** Supabase
-- **Database:** Supabase (PostgreSQL)
-- **State Management:** React Context API + useState/useEffect
-- **Build Tool:** Vite.js
-- **Package Manager:** npm
-- **Styling:** Tailwind CSS com tema customizado (dual theme: dark/light)
-- **Routing:** React Router v6 (createBrowserRouter + RouterProvider)
+- **Frontend:** React.js + TypeScript
+- **Backend / DB:** Supabase (PostgreSQL + Auth + Storage)
+- **Estado:** React Context API + hooks
+- **Build:** Vite.js
+- **Estilos:** Tailwind CSS com suporte dual-theme (dark/light)
+- **Roteamento:** React Router v6 (createBrowserRouter + RouterProvider)
+- **Pacotes:** npm
 
-## Agentes Especializados e Personas
+## Agentes e Personas
+- **@orchestrator** – coordena o contexto e valida prioridades.
+- **@analyst** – interpreta PRD, requisitos e visão de produto.
+- **@dev** – implementação de features e correções.
+- **@architect** – define padrões técnicos e de UX.
+- **@qa** – garante qualidade, cenários de teste e validações.
 
-### @orchestrator (Principal)
-**Função:** Orquestrador principal do contexto e coordenador de tarefas
+## Convenções de Código
+- PascalCase para componentes, camelCase para variáveis/funções.
+- TypeScript em strict mode com tipos explícitos.
+- Componentes funcionais + hooks (useState, useEffect, custom hooks).
+- Imports agrupados: libs externas → componentes → utils → tipos.
+- Tailwind para estilização; globals.css concentra tokens e utilidades.
+- ESLint: recommended + react + react-hooks + jsx-a11y.
+- Regras rígidas: sem hooks fora de componentes, keys estáveis, acessibilidade (alt/aria-*), links externos com `rel="noopener noreferrer"`, zero imports/variáveis não usados e `overflow-y-auto` nas páginas principais.
 
-### @analyst
-**Função:** Análise de requisitos e especificações
-
-### @dev
-**Função:** Desenvolvimento e implementação
-
-### @architect
-**Função:** Design arquitetural e técnico
-
-### @qa
-**Função:** Controle de qualidade e testes
-
-## Instruções Críticas e Regras
-
-### Convenções de Código
-- **Nomenclatura:** PascalCase para componentes, camelCase para funções/variáveis
-- **TypeScript:** Strict mode habilitado, tipagem explícita obrigatória
-- **Componentes:** Funcionais com hooks (useState, useEffect, custom hooks)
-- **CSS:** Tailwind CSS com classes utilitárias + globals.css para temas
-- **Imports:** Organizados por tipo (libs externas → componentes → utils → tipos)
-- **ESLint:** eslint:recommended + react/recommended + react-hooks/recommended + jsx-a11y/recommended
-- **Lint rules críticas:**
-  - Hooks apenas em componentes funcionais/custom hooks
-  - Listas com key estável (nunca índice)
-  - Acessibilidade obrigatória (alt, labels, roles)
-  - Links externos com rel="noopener noreferrer"
-  - Proibido variáveis/imports não usados
-  - Auto-fix obrigatório após edições
-  - **Rolagem vertical:** Páginas padrão devem manter `overflow-y-auto` para permitir rolagem quando necessário
-
-### Estrutura de Arquivos Padrão
+## Estrutura Padrão
 ```
 src/
 ├── components/
-│   ├── ui/           # Componentes base (Button, Card, Avatar, HelpModal, etc.)
-│   ├── features/     # Features principais (Dashboard, Aulas, Ranking, Comunidade, SlideHeader, SlideViewer)
-│   └── layout/       # Layout components (Header, Sidebar)
-├── lib/
-│   ├── theme.ts      # Sistema de temas (applyTheme, getStoredTheme)
-│   ├── mockData.ts   # Dados mockados para desenvolvimento
-│   └── utils.ts      # Utilitários gerais
-├── pages/           # Páginas de rota (AulaSlidePage, etc.)
-├── styles/
-│   └── globals.css   # Estilos globais + temas customizados
-├── types/            # Definições de tipos TypeScript
-└── App.tsx           # Entry point com routing
+│   ├── ui/            # Base (Button, Card, Avatar, HelpModal, Modal, etc.)
+│   ├── features/      # Features (Dashboard, Aulas, Ranking, Comunidade, Quiz*, Slide*)
+│   └── layout/        # Header, Sidebar, Layout shell
+├── lib/               # theme.ts, mockData.ts, utils.ts, constants.ts
+├── pages/             # Rotas (DashboardPage, AulasPage, AulaSlidePage, QuizPage, QuizQuestionPage, etc.)
+├── styles/            # globals.css
+├── types/             # Tipagens compartilhadas
+└── App.tsx            # RouterProvider + temas globais
 ```
 
-## Contexto dos Arquivos de Documentação
+## Documentação de Referência
+- `.trae/documents/PRD.md` – requisitos oficiais.
+- `Docs/PROGRESS.md` – status e roadmap.
+- `Docs/WORKFLOWS.md` – metodologia PREVC.
+- `Docs/BUGS.md` – issues registradas.
+- `Docs/ementa.md` – ementa completa das aulas.
 
-- **.trae/documents/PRD.md:** Documento de Requisitos do Produto, detalhando o escopo e as funcionalidades.
-- **Docs/PROGRESS.md:** Rastreamento do progresso e roadmap do projeto.
-- **Docs/WORKFLOWS.md:** Metodologia de desenvolvimento (PREVC) e fluxos de trabalho.
-- **Docs/BUGS.md:** Registro de bugs, soluções e impactos.
-- **Docs/ementa.md:** Ementa completa do curso com todas as 8 aulas estruturadas.
+## Estado Atual (Atualizado em 2025-01-28)
 
-## Estado Atual do Projeto (Última Atualização: 2025-01-27)
+### 1. Sistema de Temas Dual
+- Paletas customizadas: dark (preto + verde neon) e light (branco + violeta).
+- Alternância por classe (`html.dark`) com `applyTheme()` armazenando no localStorage.
 
-### ✅ Implementações Concluídas
+### 2. Componentes de Interface
+- **Dashboard:** saudação personalizada, cartões de progresso, pontuação total, aulas concluídas e média por aula. O antigo ranking top 3 foi substituído por uma *grade de desempenho por aula* baseada em `mockLessonScores`, exibindo pontuação ponderada de presença, quiz e desafio conforme os pesos do PRD (1.2 / 1.0 / 1.5).
+- **Aulas:** cards para as 10 aulas, descrição hierárquica (tópicos/subtópicos), expansão única, botões "Ver descrição" e "Entrar na Aula", modal (`Modal.tsx`) com atalhos para slides/quiz/desafio.
+- **Ranking:** pódio com top 3, tabela completa, estatísticas (total de alunos, média, máximo) e tendência.
+- **Comunidade:** fórum + galeria com tabs, cards, CTAs neon e indicadores.
+- **Layout Geral:** Header com navegação principal, troca de tema e atalhos para o hub comunitário.
 
-#### 1. Sistema de Temas Dual (Dark/Light)
-- **Cores personalizadas:**
-  - **Tema escuro:** Fundo preto puro (#000000) + acentos verde neon (#22c55e, #4ade80)
-  - **Tema claro:** Fundo branco (#ffffff) + acentos violeta (#a855f7, #9333ea)
-- **Seletores CSS:** `html.dark` e `html:not(.dark)` para alternância via classe no `<html>`
-- **Persistência:** localStorage com função `applyTheme()` em `lib/theme.ts`
+### 3. Sistema de Slides (ATUALIZADO)
+- **Componentes:** `SlideHeader.tsx`, `SlideViewer.tsx` e `AulaSlidePage.tsx` compõem o fluxo de estudo.
+- **Navegação:** Atalhos de teclado (`←`, `→`, `Esc`), barra de progresso com indicadores visuais e botões para Quiz/Desafio.
+- **Rodapé Fixo:** Indicadores de progresso fixados no bottom da página (z-index 11000) com informação "Slide X de Y".
+- **Layout Responsivo:** Container flex com `flex-1` para conteúdo e rodapé separado, garantindo scroll apenas no conteúdo.
 
-#### 2. Componentes de Interface Implementados
+#### 3.1. Implementação da Aula 01 (23 Slides Completos)
+- **Fonte de Dados:** `mockSlidesAula1` em `src/lib/mockData.ts` (linhas 510-672) contendo 23 slides detalhados.
+- **Carregamento:** `AulaSlidePage.tsx` importa `mockSlideDecks` e busca pelo `lessonId` usando `.find()`.
+- **Renderização de Conteúdo:**
+  - **Markdown Avançado:** Suporte para headers (#, ##, ###), listas (-, *), blockquotes (>), code blocks (\`\`\`), inline code (\`), bold (\*\*), italic (\*).
+  - **Tabelas:** Processamento customizado com `processMarkdownTable()` que:
+    - Detecta tabelas markdown (linhas iniciando/terminando com |)
+    - Ignora linhas separadoras (---|---)
+    - Gera HTML com `<table>`, `<th>` (headers com bg cinza) e `<td>` (células normais)
+    - Aplica bordas, padding e estilo dark mode
+  - **Listas sem Marcadores Duplicados:** Usa `list-none` e remove bullets adicionais do regex, respeitando emojis/ícones originais do conteúdo.
 
-##### Dashboard
-- Cards de estatísticas com efeito 3D elevado
-- Ranking top 3 alunos com indicadores de progresso
-- Saudação personalizada com nome do usuário (efeito glow text)
-- Fundos consistentes por tema (preto/branco)
+#### 3.2. Padrão de Conteúdo dos Slides
+- **Estrutura:** Cada slide possui `id`, `order`, `title`, `type` ('text' | 'code'), `content` (markdown).
+- **Tipos:**
+  - `text`: Conteúdo explicativo com formatação rica
+  - `code`: Exemplos de código com syntax highlighting via `<pre><code>`
+- **Futuras Melhorias:** Suporte para imagens (`type: 'image'`) e vídeos (`type: 'video'`) será adicionado conforme necessário.
 
-##### Aulas
-- 8 cards de aulas baseados em `Docs/ementa.md`
-- Sistema de expansão/colapso de descrições (apenas 1 aberto por vez)
-- **Descrições hierárquicas:**
-  - Tópicos principais: marcador `▸` (seta)
-  - Subtópicos indentados: marcador `•` (bolinha)
-  - Formato de dados: `;` separa tópicos, `|` separa subtópicos
-- Botões temáticos:
-  - "Ver descrição" (btn-outline): fundo preto + texto verde (dark) / fundo branco + texto violeta (light)
-  - "Entrar na Aula" (btn-neon): gradiente verde neon (dark) / gradiente violeta neon (light)
-- Seções por aula: Conteúdo, Quiz (10 questões), Desafio Prático
+#### 3.3. Padrão para Novas Aulas
+- Seguir estrutura de `mockSlidesAula1` em `mockData.ts`.
+- Manter consistência de markdown: headers, listas, tabelas, code blocks.
+- Adicionar ao array `mockSlideDecks` com `lessonId` correspondente.
+- Testar renderização de tabelas e listas antes de commit.
 
-##### Ranking
-- Pódio top 3 com cards especiais (medalhas: coroa/prata/bronze)
-- Tabela completa de classificação com todos os alunos
-- Colunas: Posição, Aluno, Pontos (Total/Presença/Quizzes/Desafios), Tendência
-- Cards de estatísticas: Total de Alunos, Média de Pontos, Pontuação Máxima, Alunos em Destaque
+### 4. Sistema de Quiz Interativo
+- **Rotas:** `/aula/:id/quiz` (card das rodadas) e `/aula/:id/quiz/:roundId` (questões).
+- **Componentes:** `QuizPage.tsx`, `QuizQuestionPage.tsx`, `QuizHeader.tsx`, `QuizQuestionViewer.tsx`, `QuizQuestionViewerSimple.tsx` e `QuizResultModal.tsx` cuidam de salvamento automático, timer, cálculo de nota mínima (70%), modal de resultado e persistência das tentativas (`QuizRoundAttempt`).
+- **Persistência:** respostas parciais e tentativas registradas no `localStorage` (`quiz_<lessonId>_<roundId>_*`).
+- **Progressão:** rodadas bloqueadas até aprovação da anterior.
 
-##### Comunidade
-- Tabs: Fórum de Dúvidas + Galeria de Projetos
-- Fórum: cards de tópicos com respostas, tags, moderadores
-- Galeria: grid de projetos com screenshots, likes, comentários
-- Botões de ação (btn-neon): "+ Novo Tópico", "+ Compartilhar Projeto"
-- Estatísticas: Tópicos no Fórum, Projetos na Galeria, Membros Ativos
-
-##### Sistema de Slides
-- **SlideHeader.tsx:** Cabeçalho personalizado com indicador de progresso X/Y, setas de navegação, botão de sair, switch de temas, botões Quiz/Desafio
-- **SlideViewer.tsx:** Visualizador principal com navegação entre slides, suporte a diferentes tipos de conteúdo
-- **AulaSlidePage.tsx:** Página principal para rota `/aula/:id` com layout completo de slides
-- **HelpModal.tsx:** Modal de ajuda com atalhos de teclado (← → Esc) e instruções de navegação
-- **Sistema de navegação completo:**
-  - Atalhos de teclado: ← (anterior), → (próximo), Esc (sair)
-  - Navegação via botões no header
-  - Indicador de progresso X/Y
-  - Botões de acesso rápido para Quiz e Desafio
-- **Classe `card-static`:** Remove efeitos hover para slides, mantendo estilo visual consistente
-
-#### 3. Sistema de Estilo Global (globals.css)
-
-##### Botões Customizados
-- **`.btn-neon`:** Gradiente neon com efeito 3D e sombras inset/externas
-  - Light: violeta (#a855f7 → #9333ea)
-  - Dark: verde (#22c55e → #16a34a)
-  - Hover: translateY(-2px) + sombras ampliadas
-
-- **`.btn-outline`:** Fundo sólido + borda temática + texto colorido
-  - Light: fundo branco + borda/texto violeta
-  - Dark: fundo preto + borda/texto verde
-  - Hover: translateY(-2px) + fundo levemente alterado
-
-##### Cards com Efeito Floating
-- **`.card`:** Efeito 3D com sombras temáticas
-  - Pseudo-elemento `::after` para sombra de hover otimizada
-  - Hover: translateY(-8px) + scale(1.01)
-  - Sombras coloridas por tema (violeta/verde)
-
-#### 4. Routing e Navegação
-- React Router v6 com `createBrowserRouter` + `RouterProvider`
-- Future flags habilitadas para compatibilidade v7
-- Rotas: `/`, `/aulas`, `/ranking`, `/comunidade`, `/aula/:id`
-- Rotas planejadas: `/aula/:id/quiz`, `/aula/:id/desafio` (placeholders)
-
-#### 5. Validações e Qualidade
-- ✅ ESLint configurado e validado (0 warnings, 0 errors)
-- ✅ TypeScript strict mode (0 erros de tipagem)
-- ✅ Acessibilidade: alt em imagens, labels, roles adequados
-- ✅ Performance: CSS otimizado com pseudo-elementos para animações
-
-### 🎨 Design System
-
-#### Paleta de Cores
-```css
-/* Tema Escuro */
---bg-primary: #000000 (preto puro)
---accent-primary: #22c55e (verde)
---accent-secondary: #4ade80 (verde claro)
---text-primary: #ffffff
-
-/* Tema Claro */
---bg-primary: #ffffff (branco)
---accent-primary: #a855f7 (violeta)
---accent-secondary: #9333ea (violeta escuro)
---text-primary: #111827
-```
-
-#### Tipografia
-- Títulos: font-bold, text-3xl/4xl
-- Corpo: text-sm/base
-- Glow effect em títulos principais (text-shadow temático)
-
-#### Espaçamentos
-- Cards: p-6, rounded-xl
-- Gaps: gap-4/6 para grids
-- Margens: mb-8 para seções principais
+### 5. Estilo Global
+- `globals.css` mantém tokens de cores, animações, botões (`.btn-neon`, `.btn-outline`), cards flutuantes e helpers para dark/light.
 
 ## Pendências e Próximos Passos
+- [ ] Integração completa com Supabase (auth, quizzes, fórum, galeria, presença).
+- [ ] Sistema de desafios práticos com submissão/avaliação (placeholder atual).
+- [ ] Criação de tópicos no fórum e upload na galeria (mock hoje).
+- [ ] Testes E2E (Playwright/Cypress).
+- [ ] Deploy (Vercel/Render) e CI/CD.
+- [ ] Normalização definitiva de encoding em arquivos legados.
 
-### Session TODOs
-- [ ] Implementar integração com Supabase (autenticação + banco de dados)
-- [ ] Criar páginas de Quiz com sistema de pontuação
-- [ ] Implementar sistema de Desafios Práticos
-- [x] Adicionar funcionalidade de "Entrar na Aula" (navegação para conteúdo)
-- [ ] Implementar criação de tópicos no Fórum
-- [ ] Implementar upload de projetos na Galeria
-- [ ] Testes E2E com Playwright/Cypress
-- [ ] Deploy em Vercel/Render
-
-### Dependencies Críticas
-- Supabase SDK configurado e autenticação funcional
-- Modelagem de dados no Supabase (tabelas: users, lessons, quizzes, forum_topics, gallery_posts)
-- Policies de RLS (Row Level Security) no Supabase
+## Dependências Críticas
+- Supabase SDK + políticas RLS (`users`, `lessons`, `quizzes`, `forum_topics`, `gallery_posts`).
+- `src/lib/mockData.ts` atualizado com `mockLessonScores` para desenvolvimento offline.
 
 ## Uso do MCP ByteRover
-
-### Estratégia de Memória Persistente
-1. **Registrar decisões arquiteturais** importantes (como sistema de temas dual e estrutura de componentes).
-2. **Salvar soluções complexas** para reuso (ex: sistema de descrições hierárquicas em Aulas).
-3. **Documentar padrões** de código encontrados (ex: seletores CSS `html.dark` para temas).
-4. **Armazenar contexto** de features desenvolvidas (Dashboard, Aulas, Ranking, Comunidade).
+1. Registrar decisões arquiteturais, padrões e soluções complexas usando `byterover-store-knowledge`.
+2. Consultar `byterover-retrieve-knowledge` antes de alterações estruturais ou investigações.
+3. Armazenar contexto das features finalizadas (Dashboard, Quiz, Slides, Comunidade, etc.).
 
 ## Regras de Engajamento
+1. Ler **AGENTS.md** ao iniciar uma sessão.
+2. Revisar PRD, PROGRESS e ementa antes de decidir mudanças grandes.
+3. Avaliar impacto em temas/estilo antes de alterar componentes compartilhados.
+4. Documentar o racional das decisões e atualizar este arquivo quando necessário.
+5. Sempre validar com `npm run lint` e `npm run build` após mudanças significativas.
 
-### Para Novas Sessões
-1. **Ler AGENTS.md** primeiro para contexto global.
-2. **Consultar .trae/documents/PRD.md** para o escopo do projeto.
-3. **Consultar Docs/PROGRESS.md** para status atual.
-4. **Verificar Docs/ementa.md** para estrutura de conteúdo das aulas.
-
-### Para Tomada de Decisão
-1. **Analisar impacto** na arquitetura existente (não quebrar sistema de temas).
-2. **Consultar documentação** relevante (PRD, ementa, PROGRESS).
-3. **Registrar decisão** no ByteRover para persistência.
-4. **Atualizar AGENTS.md** com mudanças significativas.
-
-### Para Comunicação
-- **Ser direto e técnico** nas implementações.
-- **Documentar razões** para decisões importantes.
-- **Referenciar arquivos** específicos quando aplicável.
-- **Validar com lint + typecheck** antes de finalizar.
-
-## Referências e Links Rápidos
-
-### Links Locais
-- `AGENTS.md` - Este arquivo (contexto global)
-- `.trae/documents/PRD.md` - Requisitos do produto
-- `Docs/PROGRESS.md` - Status e roadmap
-- `Docs/WORKFLOWS.md` - Metodologia PREVC
-- `Docs/BUGS.md` - Issues conhecidos
-- `Docs/ementa.md` - Estrutura do curso
-
-### Componentes Principais
-- `src/components/features/Dashboard.tsx` - Painel principal
-- `src/components/features/Aulas.tsx` - Interface de aulas
-- `src/components/features/Ranking.tsx` - Sistema de ranking
-- `src/components/features/Comunidade.tsx` - Fórum + Galeria
-- `src/components/features/SlideHeader.tsx` - Cabeçalho de slides com navegação
-- `src/components/features/SlideViewer.tsx` - Visualizador principal de slides
-- `src/components/ui/HelpModal.tsx` - Modal de ajuda com atalhos
-- `src/pages/AulaSlidePage.tsx` - Página de rota para slides
-- `src/styles/globals.css` - Temas e estilos globais
-- `src/lib/theme.ts` - Sistema de alternância de temas
+## Referências Rápidas
+- `AGENTS.md` – este documento.
+- `.trae/documents/PRD.md` – requisitos.
+- `Docs/PROGRESS.md`, `Docs/WORKFLOWS.md`, `Docs/BUGS.md`, `Docs/ementa.md`.
+- Componentes chave: `Dashboard.tsx`, `Aulas.tsx`, `Ranking.tsx`, `Comunidade.tsx`, `SlideHeader.tsx`, `SlideViewer.tsx`, `QuizHeader.tsx`, `QuizQuestionViewer.tsx`, `QuizResultModal.tsx`, `HelpModal.tsx`, `AulaSlidePage.tsx`, `QuizPage.tsx`, `QuizQuestionPage.tsx`.
 
 ---
-
-**Importante:** Este arquivo serve como orquestrador principal e deve ser mantido em sincronia com o MCP ByteRover para garantir consistência do contexto através das sessões.
 
 # Vision & MCP Instructions
 
 ## Image Handling Protocol
+1. Sempre usar o servidor **Z.ai Vision MCP** (`image_analysis`) para qualquer screenshot/imagem recebida.  
+2. Ativar quando o usuário enviar/colar/arrastar uma imagem.  
+3. Fluxo: `/mcp` → confirmar "Vision Server: connected" → chamar `image_analysis` → aguardar resposta.  
+4. Nunca utilizar visão local ou ignorar o MCP disponível.
 
-When images are provided in the conversation ([Image #N]):
+## MCP Servers Esperados
+- **Web Search MCP** – consultas externas em tempo real.  
+- **Vision MCP** – análise de imagens/vídeos.
 
-1. **Always use the Z.ai Vision MCP Server** for image analysis
-   - Tool: `image_analysis` from the Vision MCP
-   - Never bypass this tool for local image processing
-
-2. **Activation Triggers:**
-   - User sends screenshot or image file
-   - User pastes an image ([Image #N] appears in chat)
-   - User drags image into terminal
-
-3. **MCP Vision Usage Pattern:**
-   When: Image detected
-   Action: /mcp → Check "Vision Server: connected"
-   Then: Invoke image_analysis tool
-   Wait: For MCP response before proceeding
-
-4. **Do NOT:**
-   - Process images using base Agent vision capabilities
-   - Skip MCP invocation to save tokens
-   - Ignore MCP tool availability
-
-## MCP Servers Expected
-
-- **Web Search MCP**: For real-time data
-- **Vision MCP**: For image/video analysis
+### Ferramentas Byterover
+1. **`byterover-store-knowledge`** – obrigatório ao registrar novos padrões, decisões arquiteturais, soluções complexas ou finalizar tasks relevantes.  
+2. **`byterover-retrieve-knowledge`** – obrigatório antes de iniciar tarefas novas, decidir arquitetura ou depurar problemas usando histórico persistido.
 
 [byterover-mcp]
 

@@ -255,25 +255,79 @@ export function SlideViewer({
   const renderSlideContent = () => {
     if (!currentSlide) return null;
 
+    // Função para processar tabelas markdown
+    const processMarkdownTable = (content: string): string => {
+      const lines = content.split('\n');
+      let html = '';
+      let inTable = false;
+      let tableRows: string[] = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // Detectar linha de tabela (contém |)
+        if (line.startsWith('|') && line.endsWith('|')) {
+          if (!inTable) {
+            inTable = true;
+            tableRows = [];
+          }
+          tableRows.push(line);
+          
+          // Verificar se próxima linha não é tabela ou é última linha
+          const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
+          if (!nextLine.startsWith('|') || i === lines.length - 1) {
+            // Processar tabela completa
+            html += '<table class="min-w-full border-collapse border border-gray-300 dark:border-gray-700 my-4">';
+            
+            tableRows.forEach((row, idx) => {
+              const cells = row.split('|').filter(cell => cell.trim());
+              
+              // Ignorar linha separadora (contém apenas - e :)
+              if (cells.every(cell => /^[\s:-]+$/.test(cell))) {
+                return;
+              }
+              
+              const isHeader = idx === 0;
+              const tag = isHeader ? 'th' : 'td';
+              const cellClass = isHeader 
+                ? 'border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-semibold text-left'
+                : 'border border-gray-300 dark:border-gray-700 px-4 py-2';
+              
+              html += '<tr>';
+              cells.forEach(cell => {
+                html += `<${tag} class="${cellClass}">${cell.trim()}</${tag}>`;
+              });
+              html += '</tr>';
+            });
+            
+            html += '</table>';
+            inTable = false;
+          }
+        } else {
+          html += line + '\n';
+        }
+      }
+      
+      return html;
+    };
+
     switch (currentSlide.type) {
       case 'code':
         return (
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <div 
               dangerouslySetInnerHTML={{ 
-                __html: currentSlide.content
+                __html: processMarkdownTable(currentSlide.content)
                   .replace(/```(\w+)?\n/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto"><code class="language-$1">')
                   .replace(/```/g, '</code></pre>')
                   .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
                   .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
                   .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold mb-3">$1</h2>')
                   .replace(/^### (.*$)/gm, '<h3 class="text-xl font-medium mb-2">$1</h3>')
-                  .replace(/^\* (.*)$/gm, '<li class="ml-4">• $1</li>')
-                  .replace(/^- (.*)$/gm, '<li class="ml-4">• $1</li>')
+                  .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
                   .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-blue-600 dark:text-blue-400">$1</blockquote>')
-                  .replace(/\n\n/g, '</p><p class="mb-4">')
-                  .replace(/^(?!<[h|l|b])/gm, '<p class="mb-4">')
-                  .replace(/(<p class="mb-4">)?([^<]*)(<\/p>)?$/gm, '$1$2$3')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+                  .replace(/\n\n/g, '<br><br>')
               }}
             />
           </div>
@@ -285,21 +339,18 @@ export function SlideViewer({
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <div 
               dangerouslySetInnerHTML={{ 
-                __html: currentSlide.content
+                __html: processMarkdownTable(currentSlide.content)
                   .replace(/```(\w+)?\n/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto"><code class="language-$1">')
                   .replace(/```/g, '</code></pre>')
                   .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
                   .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
                   .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
                   .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-medium mb-3 text-gray-700 dark:text-gray-200">$1</h3>')
-                  .replace(/^\* (.*)$/gm, '<li class="ml-6 mb-2 text-gray-600 dark:text-gray-300">• $1</li>')
-                  .replace(/^- (.*)$/gm, '<li class="ml-6 mb-2 text-gray-600 dark:text-gray-300">• $1</li>')
+                  .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
                   .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-6 py-2 mb-4 italic text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg">$1</blockquote>')
                   .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
                   .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
-                  .replace(/\n\n/g, '</p><p class="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">')
-                  .replace(/^(?!<[h|l|b|u])/gm, '<p class="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">')
-                  .replace(/(<p class="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">)?([^<]*)(<\/p>)?$/gm, '$1$2$3')
+                  .replace(/\n\n/g, '<br><br>')
               }}
             />
           </div>
@@ -322,9 +373,9 @@ export function SlideViewer({
       />
 
       {/* Área de conteúdo do slide */}
-      <div className="pt-20 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
-        <div className="w-full">
-          <div className="card-static p-8 sm:p-12 min-h-[calc(100vh-8rem)] overflow-y-auto">
+      <div className="pt-20 pb-24 px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col">
+        <div className="w-full flex-1 flex flex-col">
+          <div className="card-static p-8 sm:p-12 flex-1 flex flex-col">
             {/* Título do slide */}
             <div className="mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -334,34 +385,38 @@ export function SlideViewer({
             </div>
 
             {/* Conteúdo do slide */}
-            <div className="slide-content max-h-[calc(100vh-16rem)] overflow-y-auto pr-4">
+            <div className="slide-content flex-1 overflow-y-auto pr-4">
               {renderSlideContent()}
-            </div>
-
-            {/* Indicadores de progresso */}
-            <div className="mt-12 flex items-center justify-between sticky bottom-0 bg-white dark:bg-[#000000] py-4 -mx-8 px-8">
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Slide {slideDeck.currentSlideIndex + 1} de {slideDeck.slides.length}
-              </div>
-              
-              <div className="flex space-x-2">
-                {slideDeck.slides.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-2 w-8 rounded-full transition-all ${
-                      index === slideDeck.currentSlideIndex
-                        ? 'bg-green-500 dark:bg-green-400'
-                        : index < slideDeck.currentSlideIndex
-                        ? 'bg-green-300 dark:bg-green-600'
-                        : 'bg-gray-300 dark:bg-gray-600'
-                    }`}
-                  />
-                ))}
-              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Rodapé fixo com indicadores de progresso */}
+      <footer className="fixed bottom-0 left-0 right-0 z-[11000] bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Slide {slideDeck.currentSlideIndex + 1} de {slideDeck.slides.length}
+            </div>
+            
+            <div className="flex space-x-2">
+              {slideDeck.slides.map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-2 w-8 rounded-full transition-all ${
+                    index === slideDeck.currentSlideIndex
+                      ? 'bg-green-500 dark:bg-green-400'
+                      : index < slideDeck.currentSlideIndex
+                      ? 'bg-green-300 dark:bg-green-600'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

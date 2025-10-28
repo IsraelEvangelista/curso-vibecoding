@@ -6,7 +6,9 @@ import {
   QuizAttempt,
   RankingEntry,
   ForumTopic,
-  GalleryPost
+  GalleryPost,
+  Slide,
+  SlideDeck
 } from '@/types';
 
 // Mock de Usuários
@@ -330,7 +332,7 @@ export const mockLessonScores: LessonScore[] = [
     challengeScore: 0,
     completed: false,
     updatedAt: '2025-01-25T09:00:00Z',
-  },
+  }
 ];
 
 // Mock de Ranking
@@ -503,3 +505,178 @@ export const mockPresenceStatus = {
   lessonId: 'aula1',
   expiresAt: '2024-03-15T23:59:59Z'
 };
+
+// Mock de Slides
+export const mockSlidesAula1: Slide[] = [
+  {
+    id: 'aula1-slide1',
+    order: 1,
+    title: 'Abertura do Curso',
+    type: 'text',
+    content: '# Vibe Coding\n## Programação Assistida por IA: Do Conceito ao Deploy\n\n- **8 encontros práticos**\n- **Outubro/Novembro 2025**\n- **20h00 às 22h30** (com laboratório aberto até 23h00)'
+  },
+  {
+    id: 'aula1-slide2',
+    order: 2,
+    title: 'Objetivos do Curso',
+    type: 'text',
+    content: '# Para Quem é Este Curso?\n\n- **🎯 Desenvolvedores Iniciantes:** Completos novatos ou em transição de carreira.\n- **💻 Vibe Coders:** Querem estruturar e aprofundar o conhecimento.\n- **👨‍💻 Desenvolvedores Tradicionais:** Buscam se atualizar com ferramentas emergentes.\n\n# O Que Você Vai Aprender?\n\n- **🧠 CONCEITOS:** Fundamentos, mitos vs. realidade, arquitetura de agentes.\n- **🛠️ MÉTODOS:** Segurança, engenharia de prompt e contexto, iteração eficaz.\n- **🚀 PRÁTICA:** Ferramentas de ponta, projeto completo do zero ao deploy.'
+  },
+  {
+    id: 'aula1-slide3',
+    order: 3,
+    title: 'A Revolução do Vibe Coding',
+    type: 'text',
+    content: '# Vibe Coding: A Nova Era da Programação\n\n**O que é Vibe Coding?**\nÉ uma técnica de programação assistida por IA onde o dev descreve o que deseja em linguagem natural para um LLM, que gera código automaticamente.\n\n**Características:** Conversacional, Iterativo, Criativo, Real.\n\n**Vibe Coding em Números (2025):**\n- **85%** dos devs usam ferramentas de IA.\n- **41%** de todo código escrito em 2024 foi gerado por IA.\n- **90%** dos engenheiros de software usarão assistentes de IA até 2028 (Gartner).'
+  },
+  {
+    id: 'aula1-slide4',
+    order: 4,
+    title: 'Vibe Coding vs. No-Code vs. Low-Code',
+    type: 'text',
+    content: '# Entendendo as Diferencas\n\n| Critério | No-Code 🎨 | Low-Code ⚙️ | Vibe Coding 🤖 |\n|---|---|---|---|\n| **Código gerado?** | ❌ Não | ⚠️ Limitado | ✅ Sim, real e editável |\n| **Para quem?** | Não-técnicos | Citizen devs | Desenvolvedores |\n| **Flexibilidade** | Baixa | Média | Alta |\n| **Portabilidade** | Nenhuma | Baixa | Alta |\n\n**O Diferencial do Vibe Coding:** Gera código real que você pode versionar, editar, manter e migrar.'
+  },
+  {
+    id: 'aula1-slide5',
+    order: 5,
+    title: 'Ecossistema de Ferramentas - Visão Panorâmica',
+    type: 'text',
+    content: '# O Ecossistema de Vibe Coding\n\n- **🎨 PLATAFORMAS ALL-IN-ONE:**\n  - **Lovable:** Transforma linguagem natural em apps web completos.\n- **🔗 AUTOMAÇÃO & ORQUESTRAÇÃO:**\n  - **n8n:** Workflows inteligentes baseados em nós.\n- **🗄️ BACKEND & BANCO DE DADOS:**\n  - **Supabase:** Alternativa open-source ao Firebase com PostgreSQL.\n- **💻 IDEs & EDITORES ASSISTIDOS:**\n  - TRAE Solo, Warp, Zed, Cursor.\n- **🤖 AGENTES & CLIs:**\n  - Claude Code, Kilo Code.'
+  },
+  {
+    id: 'aula1-slide6',
+    order: 6,
+    title: 'Plataformas de Desenvolvimento com IA',
+    type: 'text',
+    content: '# Lovable\n- Plataforma all-in-one para vibe coding.\n- Converte linguagem natural em aplicações web completas.\n- Integração nativa com Supabase e GitHub.\n\n# n8n\n- Ferramenta de automação open source e "fair code".\n- Criação de workflows através de uma interface visual baseada em nós.\n- Ideal para orquestrar agentes de IA.'
+  },
+  {
+    id: 'aula1-slide7',
+    order: 7,
+    title: 'Backend e Banco de Dados',
+    type: 'text',
+    content: '# Supabase\n- Backend as a Service open source.\n- Cada projeto é um banco PostgreSQL completo.\n- Inclui autenticação, RLS, APIs REST/GraphQL, Edge Functions, Realtime e Storage.\n- Alternativa ao Firebase com maior controle e portabilidade.'
+  },
+  {
+    id: 'aula1-slide8',
+    order: 8,
+    title: 'Outras Ferramentas do Ecossistema',
+    type: 'text',
+    content: '# Z.ai (GLM 4.6)\n- Plataforma de modelos de linguagem com contexto de 200K tokens.\n\n# Manus\n- Agente de IA com interface de objetivos, focado na delegação da intenção.\n\n# MGX (MetaGPT X)\n- No-code AI builder para criar chatbots e sistemas de análise de dados.\n\n# Outros (Aula 04)\n- IDEs: TRAE Solo, Warp, Zed, Cursor.\n- CLIs: Claude Code, Kilo Code.'
+  },
+  {
+    id: 'aula1-slide9',
+    order: 9,
+    title: 'Riscos Principais do Vibe Coding',
+    type: 'text',
+    content: '# O que pode dar errado?\n\n- **Código vulnerável:** LLMs podem gerar implementações inseguras.\n- **Shadow AI:** Uso não autorizado de IA, com risco de vazamento de dados.\n- **Segurança de secrets:** Exposição de chaves e tokens em prompts.\n- **Qualidade e manutenibilidade:** Código gerado pode ser difícil de entender e manter.\n- **Lock-in:** Dependência de um único fornecedor de IA.'
+  },
+  {
+    id: 'aula1-slide10',
+    order: 10,
+    title: 'Shadow AI & Dados Sensíveis',
+    type: 'text',
+    content: '# Shadow AI: o risco invisível\n\n- **O que é:** Uso de ferramentas de IA sem aprovação de TI/compliance.\n- **Estatísticas:** 59% dos colaboradores usam IA não aprovada; 52% violariam a política para usar IA.\n\n# Mitigação\n- Política clara de IA (NIST AI RMF).\n- Treinamento e sinalização de dados sensíveis.\n- Bloqueios técnicos (DLP, gateway de IA).\n- Canal "oficial" de IA com logging.'
+  },
+  {
+    id: 'aula1-slide11',
+    order: 11,
+    title: 'Segurança de Secrets & Código Seguro',
+    type: 'text',
+    content: '# Protegendo segredos e evitando "code smells" de IA\n\n- **NÃO** cole chaves/tokens em prompts.\n- Use **.env / variáveis de ambiente**.\n- Ative **Secret scanning** no GitHub.\n- Use **dados sintéticos** em prompts, nunca PII real.\n- Implemente **RLS (Row-Level Security)** no Supabase.\n- **Revisão humana obrigatória** para código crítico.'
+  },
+  {
+    id: 'aula1-slide12',
+    order: 12,
+    title: 'Boas Práticas & Governança',
+    type: 'text',
+    content: '# Boas Práticas: segurança, portabilidade e compliance\n\n| Risco | Prática Recomendada |\n|---|---|\n| **Shadow AI** | Política de IA + treinamento + gateway aprovado |\n| **Secrets em repos** | 12-Factor (.env) + Secret Scanning |\n| **Código inseguro** | Revisão humana + SAST/DAST + testes |\n| **Lock-in** | Preferir padrões abertos; multi-fornecedor |\n| **LGPD/ANPD** | Mapear dados pessoais; base legal; DPIA |\n| **Governança de IA** | Adotar NIST AI RMF |'
+  },
+  {
+    id: 'aula1-slide13',
+    order: 13,
+    title: 'Segurança de Secrets & LGPD',
+    type: 'text',
+    content: '# Boas Práticas\n\n- **Nunca versionar .env:** Separe configuração do código (12-Factor App).\n- **Usar .gitignore atualizado:** Mantenha um .env.example como template.\n- **Gerenciar secrets com serviços adequados:** HashiCorp Vault, Doppler, GitHub Secrets.\n- **Dados sintéticos no desenvolvimento:** Evite PII real em prompts para cumprir a LGPD.\n- **Sanitização e mascaramento de logs:** Remova ou mascare informações sensíveis.'
+  },
+  {
+    id: 'aula1-slide14',
+    order: 14,
+    title: 'Governança de IA & Qualidade do Código',
+    type: 'text',
+    content: '# Governança de IA\n- Adote um framework como o **NIST AI Risk Management Framework** (Map, Measure, Manage, Govern).\n- Defina políticas claras de uso aceitável e uma lista de ferramentas aprovadas.\n\n# Qualidade do Código\n- **Revisão humana obrigatória:** Trate cada linha de código gerado como potencialmente perigosa.\n- **Análise estática (SAST) e testes:** Combine revisão manual com ferramentas automáticas.\n- **Documentação de decisões arquiteturais (ADRs).**'
+  },
+  {
+    id: 'aula1-slide15',
+    order: 15,
+    title: 'Prompts Seguros & Visibilidade/Monitoramento',
+    type: 'text',
+    content: '# Prompts Seguros\n- Minimize dados sensíveis, use placeholders.\n- Peça explicitamente por requisitos de segurança (ex: "use bcrypt para hash de senha").\n- Trate a saída como não confiável até ser revisada.\n\n# Visibilidade e Monitoramento\n- **CASB (Cloud Access Security Brokers):** Descubra o Shadow AI e aplique políticas.\n- **DLP (Data Loss Prevention):** Monitore e bloqueie vazamentos de dados em prompts.'
+  },
+  {
+    id: 'aula1-slide16',
+    order: 16,
+    title: 'Checklist de Riscos (Material para Download)',
+    type: 'text',
+    content: '# Checklist de Riscos\n\n- [ ] Políticas de uso de IA documentadas (NIST AI RMF).\n- [ ] Ferramentas aprovadas definidas.\n- [ ] Gestão de secrets implementada (.env, gitignore, etc.).\n- [ ] Dados sensíveis identificados e protegidos.\n- [ ] LGPD/GDPR considerados no tratamento de dados.\n- [ ] Revisão humana obrigatória para código gerado por IA.\n- [ ] Análise de segurança automatizada (SAST, SCA, DAST) no pipeline.\n- [ ] Monitoramento de Shadow AI ativo (CASB/DLP).'
+  },
+  {
+    id: 'aula1-slide17',
+    order: 17,
+    title: 'Demonstração Prática',
+    type: 'text',
+    content: '# Demonstração ao vivo (15 minutos)\n\n1. **Lovable:** Criar aplicação simples com prompt em linguagem natural.\n2. **n8n:** Workflow básico conectando duas aplicações.\n3. **Supabase:** Estrutura de banco de dados e autenticação.\n\n**Objetivo:** Mostrar a "sensação" do vibe coding na prática.'
+  },
+  {
+    id: 'aula1-slide18',
+    order: 18,
+    title: 'Exercício Guiado - Parte 1',
+    type: 'text',
+    content: '# Exercício: Ciclo Prompt → Saída → Refino\n\n**Contexto:** Criar um app de lista de tarefas com uma ferramenta de vibe coding.\n\n## Etapa 1: Prompt Inicial Simples (10 min)\n- **Escreva:** "Crie um aplicativo de lista de tarefas"\n- **Observe** o resultado gerado.\n- **Discuta:** O que funcionou? O que faltou?'
+  },
+  {
+    id: 'aula1-slide19',
+    order: 19,
+    title: 'Exercício Guiado - Parte 2',
+    type: 'text',
+    content: '# Exercício: Ciclo Prompt → Saída → Refino\n\n## Etapa 2: Refinamento com Contexto (15 min)\n- **Refine o prompt:** "Crie um aplicativo de lista de tarefas onde o usuário pode adicionar, editar e marcar tarefas como concluídas. Use cores suaves, fonte legível e botões claros. Inclua contador de tarefas pendentes."\n- **Compare** com o resultado anterior.\n\n## Etapa 3: Iteração de Segurança (10 min)\n- **Adicione:** "Adicione validação de entrada para evitar XSS e limite o tamanho do texto a 200 caracteres."'
+  },
+  {
+    id: 'aula1-slide20',
+    order: 20,
+    title: 'Entregável da Aula 01',
+    type: 'text',
+    content: '# Entregável: Mapa Mental\n\nCrie um mapa mental com o tema central **"Vibe Coding"** e as seguintes ramificações:\n\n- O que é **Contexto** (requisitos, constraints, etc.)\n- O que é **Prompt** (a instrução específica)\n- Como Contexto melhora Prompts\n- Riscos de Contexto Insuficiente\n- Boas Práticas aprendidas\n\n**Ferramentas:** Miro, Figma, MindMeister ou desenho manual.'
+  },
+  {
+    id: 'aula1-slide21',
+    order: 21,
+    title: 'Recap e Próximos Passos',
+    type: 'text',
+    content: '# Resumo da Aula\n- O que é Vibe Coding e seu ecossistema.\n- Diferenças para No-Code/Low-Code.\n- Riscos de segurança e como mitigá-los.\n- A importância do ciclo: Prompt → Saída → Refino.\n\n# Próxima Aula\n**Aula 02:** Arquitetura de Agente & Engenharia de Contexto'
+  },
+  {
+    id: 'aula1-slide22',
+    order: 22,
+    title: 'Q&A',
+    type: 'text',
+    content: '# Perguntas e Respostas\n\nEspaço aberto para dúvidas.'
+  },
+  {
+    id: 'aula1-slide23',
+    order: 23,
+    title: 'Recursos Adicionais',
+    type: 'text',
+    content: '# Recursos Adicionais\n\n- Links para documentação das ferramentas.\n- Artigos recomendados sobre vibe coding.\n- Checklist de segurança para download.\n- Planilha "mapa de ferramentas".'
+  }
+];
+
+export const mockSlideDecks: SlideDeck[] = [
+  {
+    id: 'deck-aula1',
+    lessonId: 'aula1',
+    title: 'Aula 01: Fundamentos do Vibe Coding & Riscos',
+    slides: mockSlidesAula1,
+    currentSlideIndex: 0
+  }
+];
