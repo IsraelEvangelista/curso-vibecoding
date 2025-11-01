@@ -176,6 +176,7 @@ export interface Slide {
   content: string;
   type: "text" | "code" | "image" | "video";
   order: number;
+  image?: string; // URL da imagem para exibir ao lado do conteúdo
 }
 
 export interface SlideDeck {

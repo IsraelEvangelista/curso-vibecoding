@@ -228,6 +228,15 @@ export function SlideViewer({
     navigate(`/aula/${slideDeck.lessonId}/desafio`);
   }, [onNavigateToChallenge, navigate, slideDeck.lessonId]);
 
+  // Navegar para slide específico
+  const handleGoToSlide = useCallback((slideIndex: number) => {
+    if (slideIndex >= 0 && slideIndex < slideDeck.slides.length) {
+      const updatedSlideDeck = { ...slideDeck, currentSlideIndex: slideIndex };
+      setSlideDeck(updatedSlideDeck);
+      onSlideChange(slideIndex);
+    }
+  }, [slideDeck, onSlideChange]);
+
   // Navegação com teclado
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -386,7 +395,27 @@ export function SlideViewer({
 
             {/* Conteúdo do slide */}
             <div className="slide-content flex-1 overflow-y-auto pr-4">
-              {renderSlideContent()}
+              {currentSlide?.image ? (
+                <div className="flex flex-col md:flex-row gap-6 items-start">
+                  {/* Conteúdo à esquerda */}
+                  <div className="md:w-2/5">
+                    {renderSlideContent()}
+                  </div>
+                  {/* Imagem à direita, maior */}
+                  <div className="md:w-3/5 flex flex-col items-center justify-center">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+                      Professores deste curso:
+                    </h3>
+                    <img 
+                      src={currentSlide.image} 
+                      alt={currentSlide.title}
+                      className="w-full h-auto rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
+                    />
+                  </div>
+                </div>
+              ) : (
+                renderSlideContent()
+              )}
             </div>
           </div>
         </div>
@@ -404,14 +433,24 @@ export function SlideViewer({
               {slideDeck.slides.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-2 w-8 rounded-full transition-all ${
-                    index === slideDeck.currentSlideIndex
-                      ? 'bg-green-500 dark:bg-green-400'
-                      : index < slideDeck.currentSlideIndex
-                      ? 'bg-green-300 dark:bg-green-600'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                />
+                  className="relative group"
+                >
+                  <button
+                    onClick={() => handleGoToSlide(index)}
+                    className={`h-2 w-8 rounded-full transition-all cursor-pointer hover:scale-110 ${
+                      index === slideDeck.currentSlideIndex
+                        ? 'bg-green-500 dark:bg-green-400'
+                        : index < slideDeck.currentSlideIndex
+                        ? 'bg-green-300 dark:bg-green-600'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                    title={`Ir para slide ${index + 1}`}
+                  />
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    Slide {index + 1}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
