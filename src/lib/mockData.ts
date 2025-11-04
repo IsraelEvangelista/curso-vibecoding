@@ -192,7 +192,7 @@ export const mockLessons: Lesson[] = [
     title: 'Aula 03: LLMs para Vibe Coding (foco em GLM 4.6)',
     description: 'Comparação de modelos, critérios de seleção e demonstrações práticas.',
     order: 3,
-    isLocked: true,
+    isLocked: false,
     duration: '2h 15min',
     content: {
       explanation: [
@@ -836,6 +836,93 @@ export const mockSlidesAula2: Slide[] = [
   }
 ];
 
+export const mockSlidesAula3: Slide[] = [
+  {
+    id: 'aula3-slide1',
+    order: 1,
+    title: 'Fundamentos de Large Language Models',
+    type: 'text',
+    content: '## O que são LLMs?\nLarge Language Models (LLMs) são sistemas de IA treinados com vastas quantidades de dados textuais, capazes de compreender, gerar e manipular linguagem humana com alta proficiência.\n\n## Evolução Histórica\n\n### GPT-1 (2018) → GPT-3 (2020) → GPT-4 (2023) → GPT-5 (2025)\n### BERT (2018) → RoBERTa (2019) → modelos multilíngue (2021-2023)\n### T5 (2019) → FLAN-T5 (2022) → modelos instruction-tuned (2023-2024)\n\n## Classificação por Arquitetura\n\n| Arquitetura | Exemplos | Características | Capacidade Agentica |\n|------------|----------|---------------|-------------------|\n| Transformer-based | GPT-4, Claude, Gemini | Attention mechanisms, paralelizável | Alta |\n| Mixture-of-Experts (MoE) | GLM 4.6, Kimi K2 | Roteamento inteligente, eficiência | Média-Alta |\n| Sparse | MiniMax M2 | Pensamento intercalado, menos parâmetros ativos | Alta |\n| Retrieval-Augmented | RAG systems | Base de conhecimento externa | Média |'
+  },
+  {
+    id: 'aula3-slide2',
+    order: 2,
+    title: 'GLM 4.6 - O Modelo Principal para Vibe Coding',
+    type: 'text',
+    content: '## Desenvolvimento e Lançamento\n\n- **Desenvolvedor:** Zhipu AI (China)\n- **Lançamento:** Setembro 2025\n- **Posicionamento:** Alternativa competitiva aos modelos ocidentais\n\n## Arquitetura e Especificações\n\n### Arquitetura Mixture-of-Experts (MoE)\n- **355B parâmetros totais** (aggregate)\n- **Roteamento seletivo** para ativação especializada\n- **Otimização de inferência** para alta eficiência\n\n### Janela de Contexto\n- **200K tokens input** (entre as maiores disponíveis)\n- **128K tokens output**\n- **Compressão inteligente** para maximizar uso\n\n### Eficiência e Custo\n- **Usa 15-30% menos tokens** que versões anteriores\n- **Preços atualizados:**\n  - **Input:** $0.60/M tokens\n  - **Cached Input:** $0.11/M tokens (limitado)\n  - **Output:** $2.20/M tokens\n  - **Web Search:** $0.01/uso\n  - **Slide/Poster Agent:** $0.70/M tokens\n  - **Tradução:** $3/M tokens\n  - **CogView-4:** $0.01/imagem\n  - **Vídeo:** $0.20-0.40/unidade\n  - **Assinatura coding:** A partir de $3/mês\n- **Relação custo-benefício:** Uma das melhores do mercado'
+  },
+  {
+    id: 'aula3-slide3',
+    order: 3,
+    title: 'APIs e UIs Web dos Principais Modelos',
+    type: 'text',
+    content: '## OpenAI (GPT-5 e Codex GPT-5)\n\n### Plataformas Web\n- **ChatGPT-5:** chat.openai.com com interface conversacional avançada\n- **Playground:** playground.openai.com para testes e experimentação\n- **API Platform:** platform.openai.com para desenvolvedores\n\n### Características das APIs\n- **Endpoints:** Completions, Chat, Embeddings, Fine-tuning\n- **Rate Limits:** Diferentes por tier (Free, Plus, Pro, Enterprise)\n- **Modos de Raciocínio:** Low (Auto), Medium (Fast), High (Thinking)\n- **Streaming:** Respostas em tempo real para longas gerações\n\n## Anthropic (Claude Sonnet 4.5 e Opus 4.1)\n\n### Plataformas Web\n- **Claude.ai:** claude.ai com interface conversacional\n- **API Console:** console.anthropic.com para desenvolvedores\n\n### Características das APIs\n- **Endpoints:** Messages, Completions, Embeddings\n- **Tool Use:** Nativo com chamada de funções\n- **Vision:** Processamento de imagens e documentos\n- **Rate Limits:** Controlados por uso e tipo de plano\n\n## Comparativo de Interfaces\n\n| Plataforma | Interface Principal | Foco | Vantagens |\n|-----------|------------------|------|-----------|\n| **OpenAI** | ChatGPT-5 | Generalista | Ecossistema maduro |\n| **Anthropic** | Claude.ai | Raciocínio | Tool use avançado |\n| **Google** | Gemini Advanced | Multimodal | Integração Google |\n| **Zhipu AI** | GLM Chat | Coding | Custo-benefício |\n| **Moonshot** | Kimi Chat | Coding | Alternativa econômica |'
+  },
+  {
+    id: 'aula3-slide4',
+    order: 4,
+    title: 'Critérios de Escolha de Modelo',
+    type: 'text',
+    content: '## Para Desenvolvimento Individual\n- **Custo-benefício:** GLM 4.6 (melhor relação), Kimi K2 (alternativa econômica)\n- **Qualidade:** Claude Sonnet 4.5 (tarefas complexas), GPT-5 (generalista)\n- **Multimodalidade:** Gemini 2.5 Pro (integração Google)\n- **Janela de Contexto:** GLM 4.6 (200K), Gemini 2.5 (1M)\n\n### Para Empresas e Startups\n- **Volume:** MiniMax M2 (alto volume com pensamento intercalado), GLM 4.6 (balance geral)\n- **Segurança:** Claude Opus 4.1 (máxima qualidade), GPT-5 (ecossistema maduro)\n- **Integração:** Gemini 2.5 Pro (Google Workspace), Vertex AI (Google Cloud)\n- **Controle Total:** GLM 4.6 (open source), APIs self-hosted\n\n## Framework de Decisão\n\n### Matriz de Decisão\n| Requisito | Modelo Recomendado | Justificativa | Preço Atualizado |\n|------------|------------------|-------------|----------------|\n| **Custo-benefício** | GLM 4.6 | Melhor relação custo-performance | Input: $0.60/M, Output: $2.20/M |\n| **Qualidade máxima** | Claude Opus 4.1 | Padrão ouro em tarefas críticas | Input: $15/M, Output: $75/M |\n| **Multimodalidade** | Gemini 2.5 Pro | Melhor integração com ecossistema Google | Input: $1.25-2.50/M, Output: $10/M |\n| **Alto volume** | MiniMax M2 | Pensamento intercalado para uso intensivo | Não divulgado |\n| **Coding geral** | GPT-5 | Ecossistema mais maduro e documentado | Input: $1.25-2.50/M, Output: $10-15/M |'
+  },
+  {
+    id: 'aula3-slide5',
+    order: 5,
+    title: 'Planos e Preços dos Modelos',
+    type: 'text',
+    content: '## OpenAI (GPT-5 e Codex GPT-5)\n\n### Planos Disponíveis\n- **ChatGPT-5 Pro:** $20/mês para acesso prioritário\n- **ChatGPT-5 Mini/Nano:** Planos econômicos para alto volume\n- **API Pay-as-you-go:** $1.25-2.50/M input, $10-15/M output\n- **Modos de Raciocínio:** Low (Auto), Medium (Fast), High (Thinking)\n\n### Vantagens\n- **Ecossistema maduro** com integrações completas\n- **Suporte multimodal** avançado\n- **Comunidade ativa** e documentação extensa\n\n## Anthropic (Claude Sonnet 4.5 e Opus 4.1)\n\n### Planos Disponíveis\n- **Claude Pro/Max/Team:** Planos empresariais disponíveis\n- **Claude Sonnet 4.5:** $3.00/M input, $15.00/M output\n- **Claude Opus 4.1:** $15.00/M input, $75.00/M output\n- **Contexto:** 200K tokens input, 32K output\n\n### Vantagens\n- **Melhor em raciocínio complexo**\n- **Tool orchestration** avançada\n- **Segurança e alinhamento** robustos\n\n## Zhipu AI (GLM 4.6)\n\n### Planos Disponíveis\n- **Input:** $0.60/M tokens\n- **Cached Input:** $0.11/M tokens (limitado)\n- **Output:** $2.20/M tokens\n- **Web Search:** $0.01/uso\n- **Slide/Poster Agent:** $0.70/M tokens\n- **Tradução:** $3/M tokens\n- **CogView-4:** $0.01/imagem\n- **Vídeo:** $0.20-0.40/unidade\n- **Assinatura coding:** A partir de $3/mês\n- **Open Source:** Disponível para deploy local (MIT license)\n- **Contexto:** 200K input, 128K output\n\n### Vantagens\n- **Melhor custo-benefício** do mercado\n- **Suporte multilíngue** nativo\n- **Open source** para controle total'
+  },
+  {
+    id: 'aula3-slide6',
+    order: 6,
+    title: 'Demonstração de Interfaces Web',
+    type: 'text',
+    content: '## Tour Guiado das Principais Plataformas\n\n### OpenAI ChatGPT-5\n- **Acesso:** chat.openai.com\n- **Demonstração:** Interface conversacional com modos de raciocínio\n- **Recursos:** Histórico de conversas, custom GPTs, file upload\n\n### Anthropic Claude.ai\n- **Acesso:** claude.ai\n- **Demonstração:** Interface com artifacts e tool use\n- **Recursos:** Projects, compartilhamento de conversas, análise de documentos\n\n### Google Gemini Advanced\n- **Acesso:** gemini.google.com/advanced\n- **Demonstração:** Interface multimodal com integração Google\n- **Recursos:** Extensões, integração com Workspace, side-by-side\n\n### Zhipu AI GLM Chat\n- **Acesso:** chatglm.cn/main\n- **Demonstração:** Interface otimizada para chinês/inglês\n- **Recursos:** Contexto amplo, tool calling, streaming\n\n### Moonshot Kimi Chat\n- **Acesso:** kimi.moonshot.cn/chat\n- **Demonstração:** Interface com agentic capabilities\n- **Recursos:** Long context, web search integrada, file analysis\n\n## Análise Comparativa\n\n### Experiência do Usuário\n- **OpenAI:** Interface polida mas mais corporativa\n- **Anthropic:** Foco em produtividade com artifacts\n- **Google:** Integração profunda com ecossistema Google\n- **Zhipu AI:** Interface simples mas funcional\n- **Moonshot:** Inovações em agentic capabilities'
+  },
+  {
+    id: 'aula3-slide7',
+    order: 7,
+    title: 'Configuração e Setup com GLM 4.6',
+    type: 'code',
+    content: '## Instalação de Ferramentas\n\n### Kilo Code\n```bash\nnpm install -g @kilocode/kilo-code\n```\n\n### Configuração de API\n```bash\nexport GLM_API_KEY="sua-chave-aqui"\nexport GLM_BASE_URL="https://api.zhipuai.ai/v1"\n```\n\n### VS Code Extensions\n- **GLM 4.6 Extension:** Busque na marketplace\n- **Claude Code Extension 2.0:** Instale para integração completa\n\n## Validação de Conectividade\n```javascript\n// Teste básico com Kilo Code\nconst response = await kiloCode.ask("Olá GLM 4.6!");\nconsole.log(response);\n```'
+  },
+  {
+    id: 'aula3-slide8',
+    order: 8,
+    title: 'Workflows de Desenvolvimento Eficientes',
+    type: 'text',
+    content: '## Ciclo de Desenvolvimento\n\n### Prompt → Resposta → Refinamento → Iteração\n1. **Prompt inicial** claro e específico\n2. **Análise da resposta** gerada pelo modelo\n3. **Refinamento** com base nos resultados\n4. **Iteração** até atingir o objetivo desejado\n\n## Templates Reutilizáveis\n\n### Template para Componentes React\n```\nVocê é um especialista em React e TypeScript. Crie um componente [NOME] com:\n- [REQUISITO 1]\n- [REQUISITO 2]\n- [REQUISITO 3]\n\nUse TypeScript estrito e Tailwind CSS para estilização.\n```\n\n### Template para Refatoração\n```\nAnalise o seguinte código e identifique oportunidades de melhoria:\n\n[CÓDIGO AQUI]\n\nFoco em:\n1. Performance\n2. Legibilidade\n3. Manutenibilidade\n4. Segurança\n\nSugira refatorações específicas com justificativas.\n```'
+  },
+  {
+    id: 'aula3-slide9',
+    order: 9,
+    title: 'Técnicas de Prompt Engineering para GLM 4.6',
+    type: 'code',
+    content: '## Few-shot Learning\n\n### Exemplo para GLM 4.6\n```\nCrie uma função de validação de email seguindo estes exemplos:\n\nExemplo 1:\nEntrada: "test@example.com"\nSaída: Válido\n\nExemplo 2:\nEntrada: "invalid-email"\nSaída: Inválido - formato incorreto\n\nExemplo 3:\nEntrada: "user@domain.co.uk"\nSaída: Válido\n\nAgora valide este email: "novo@exemplo.com"\n```\n\n## Chain-of-Thought\n\n### Decomposição de Problemas Complexos\n```\nPara resolver este problema de programação, siga estes passos:\n\n1. Analise os requisitos e identifique as entidades principais\n2. Projete a arquitetura da solução\n3. Implemente o código componente por componente\n4. Integre os componentes e teste a solução completa\n5. Otimize para performance e legibilidade\n\nProblema: [DESCRIÇÃO DO PROBLEMA]\n```\n\n## Role-playing\n\n### Personas Especializadas\n```\nVocê é um especialista em [ÁREA] com 10 anos de experiência.\n\nPara esta tarefa, adote a persona de [PERSONA ESPECÍFICA]:\n- Foco em [ASPECTO 1]\n- Considerações sobre [ASPECTO 2]\n- Abordagem [METODOLOGIA]\n\nAnalise este [PROBLEMA] e forneça uma solução especializada.\n```'
+  },
+  {
+    id: 'aula3-slide10',
+    order: 10,
+    title: 'Otimização de Contexto com GLM 4.6',
+    type: 'code',
+    content: '## Maximizando a Janela de Contexto\n\n### Estratégias de Compressão\n- **Resumo inteligente:** Extraia pontos-chave do contexto\n- **Hierarquização:** Organize informações por importância\n- **Eliminação de redundância:** Remova dados duplicados ou irrelevantes\n\n### Técnicas de Persistência\n- **Contexto contínuo:** Mantenha histórico relevante\n- **Seleção dinâmica:** Escolha informações baseadas na tarefa atual\n- **Atualização incremental:** Adicione novos dados sem perder contexto anterior\n\n## Exemplo Prático\n```\nContexto do projeto:\n- Framework: React + TypeScript\n- Estilo: Tailwind CSS\n- Estado: React Context\n- Autenticação: Supabase Auth\n\nTarefa atual: Implementar formulário de contato\n\nContexto otimizado para GLM 4.6:\n"Projeto React + TypeScript + Tailwind + Supabase. Implemente formulário de contato com validação, usando hooks do React Context para estado e Supabase para autenticação. Siga os padrões de código estabelecidos no projeto."\n```'
+  },
+  {
+    id: 'aula3-slide11',
+    order: 11,
+    title: 'Projeto Prático: Sistema de Benchmarking',
+    type: 'text',
+    content: '## Objetivo do Projeto\n\nDesenvolver um sistema completo de benchmarking comparativo entre os principais modelos LLM (GLM 4.6, Claude Sonnet 4.5, Gemini 2.5 Pro, Kimi K2) com:\n- Interface web para testes\n- Análise de performance em tempo real\n- Geração de relatórios comparativos\n- Visualização de resultados\n\n## Arquitetura do Projeto\n\n### Frontend\n- **Framework:** React + TypeScript\n- **Estilo:** Tailwind CSS\n- **Estado:** React Context\n- **Componentes:** Dashboard, TestRunner, Relatórios\n\n### Backend\n- **APIs:** Integração com múltiplos provedores\n- **Armazenamento:** Resultados e métricas\n- **Autenticação:** Sistema de usuários\n\n### Funcionalidades\n\n#### Test Runner\n- **Interface para prompts:** Área de texto para entrada\n- **Seleção de modelos:** Escolha entre GLM 4.6, Claude, Gemini\n- **Execução simultânea:** Compare múltiplos modelos ao mesmo tempo\n- **Coleta de métricas:** Latência, qualidade, custo, tokens\n\n#### Dashboard de Resultados\n- **Tabelas comparativas:** Performance por modelo\n- **Gráficos visuais:** Latência, custo, qualidade\n- **Filtros e busca:** Por tipo de tarefa, modelo, data\n\n## Entregáveis do Projeto\n\n### Código Fonte\n- Implementação completa e bem estruturada\n- **Documentação:** Guia de instalação e uso\n- **Testes:** Suite validando funcionalidades\n- **Deploy:** Aplicação funcional em ambiente de produção\n\n### Relatório de Benchmarking\n- **Análise comparativa:** Desempenho e custos\n- **Recomendações:** Guia de escolha de modelo por caso de uso\n- **Apresentação:** Slides explicando arquitetura e resultados'
+  },
+  {
+    id: 'aula3-slide12',
+    order: 12,
+    title: 'Conclusão e Próximos Passos',
+    type: 'text',
+    content: '## Resumo da Aula\n\n- **GLM 4.6:** Modelo principal para Vibe Coding\n- **Vantagens competitivas:** Custo-benefício, contexto amplo\n- **Ecossistema maduro:** Ferramentas e integrações completas\n- **Foco prático:** Configuração e uso efetivo\n\n## Próximos Passos\n\n### Aula 04: Ambientes e Ferramentas\n- **TRAE Solo:** IDE principal com suporte GLM 4.6\n- **CLIs:** Kilo Code, Claude Code, Gemini CLI\n- **Workflows:** Integração entre ferramentas\n\n### Projeto Dirigido (Aulas 06-07)\n- **Aplicação prática:** Usar GLM 4.6 em projeto real\n- **Integração com Supabase:** Backend e autenticação\n- **Deploy:** Publicação em produção\n\n## Recursos Adicionais\n\n- **Documentação oficial:** GLM 4.6 specs e guias\n- **Comunidade:** Fóruns e grupos de discussão\n- **Projetos exemplo:** Repositórios com implementações referencia\n- **Suporte:** Canais de ajuda e suporte técnico'
+  }
+];
+
 export const mockSlideDecks: SlideDeck[] = [
   {
     id: 'deck-aula1',
@@ -849,6 +936,13 @@ export const mockSlideDecks: SlideDeck[] = [
     lessonId: 'aula2',
     title: 'Aula 02: Arquitetura de Agente & Engenharia de Contexto',
     slides: mockSlidesAula2,
+    currentSlideIndex: 0
+  },
+  {
+    id: 'deck-aula3',
+    lessonId: 'aula3',
+    title: 'Aula 03: LLMs para Vibe Coding (foco em GLM 4.6)',
+    slides: mockSlidesAula3,
     currentSlideIndex: 0
   }
 ];
