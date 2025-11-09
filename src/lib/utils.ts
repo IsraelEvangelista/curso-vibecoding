@@ -61,3 +61,36 @@ export function getTrendColor(trend: 'up' | 'down' | 'stable'): string {
     default: return 'text-gray-600';
   }
 }
+
+import type { QuizQuestion } from "@/types";
+
+// Funções de utilidade para aleatorização
+export function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
+
+export function shuffleOptions(question: QuizQuestion): QuizQuestion {
+  const options = [...question.options];
+  const correctAnswer = question.correctAnswer;
+  
+  // Criar array de índices embaralhados
+  const indices = Array.from({ length: options.length }, (_, i) => i);
+  const shuffledIndices = shuffleArray(indices);
+  
+  // Reordenar opções conforme índices embaralhados
+  const shuffledOptions = shuffledIndices.map(index => options[index]);
+  
+  // Encontrar nova posição da resposta correta
+  const newCorrectAnswer = shuffledIndices.indexOf(correctAnswer);
+  
+  return {
+    ...question,
+    options: shuffledOptions,
+    correctAnswer: newCorrectAnswer
+  };
+}

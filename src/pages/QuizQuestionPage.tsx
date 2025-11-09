@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { QuizQuestionViewer } from "@/components/features/QuizQuestionViewer";
-import { mockLessons } from "@/lib/mockData";
 import type { QuizRound, QuizRoundAttempt } from "@/types";
+import { generateQuizRoundsAsync } from "@/lib/quizLoader";
 
 // Funções para persistência no localStorage
 const loadCurrentAnswers = (lessonId: string, roundId: string): number[] => {
@@ -32,33 +32,12 @@ const hasUnlockedRound = (lessonId: string, roundIndex: number): boolean => {
 
   const previousRoundId = `round-${roundIndex}`;
   const previousAttempts = loadRoundAttempts(lessonId, previousRoundId);
-  return previousAttempts.some(attempt => attempt.score >= 70);
+  const passed = previousAttempts.some(attempt => attempt.score >= 70);
+  const exhausted = previousAttempts.length >= 3;
+  return passed || exhausted;
 };
 
-// Gerar rodadas do quiz
-const generateQuizRounds = (lessonId: string): QuizRound[] => {
-  const lesson = mockLessons.find(l => l.id === lessonId);
-  if (!lesson) return [];
-
-  const questions = lesson.quiz.questions;
-  const roundsPerQuiz = 3;
-  const questionsPerRound = Math.ceil(questions.length / roundsPerQuiz);
-
-  return Array.from({ length: roundsPerQuiz }, (_, roundIndex) => {
-    const startIndex = roundIndex * questionsPerRound;
-    const endIndex = Math.min(startIndex + questionsPerRound, questions.length);
-    const roundQuestions = questions.slice(startIndex, endIndex);
-
-    return {
-      id: `round-${roundIndex + 1}`,
-      title: `Rodada ${roundIndex + 1}`,
-      questions: roundQuestions,
-      maxAttempts: 3,
-      attempts: loadRoundAttempts(lessonId, `round-${roundIndex + 1}`),
-      isLocked: roundIndex > 0
-    };
-  });
-};
+// Removida geração local; usar generateQuizRoundsAsync para carregar markdown em aula1.
 
 export function QuizQuestionPage() {
   const navigate = useNavigate();
@@ -69,36 +48,38 @@ export function QuizQuestionPage() {
 
   useEffect(() => {
     if (!lessonId || !roundId) return;
-
-    const quizRounds = generateQuizRounds(lessonId).map((round, index) => ({
-      ...round,
-      isLocked: !hasUnlockedRound(lessonId, index),
-    }));
-    const round = quizRounds.find(r => r.id === roundId);
     
-    if (!round) {
-      navigate(`/aula/${lessonId}/quiz`);
-      return;
-    }
-
-    // Verificar se a rodada está desbloqueada
-    if (round.isLocked) {
-      navigate(`/aula/${lessonId}/quiz`);
-      return;
-    }
-
-    setCurrentRound(round);
-    setQuestionIndex(0);
-
-    // Carregar respostas salvas
-    const savedAnswers = loadCurrentAnswers(lessonId, roundId);
-    const initialAnswers = new Array(round.questions.length).fill(-1);
-    savedAnswers.forEach((answer, index) => {
-      if (index < initialAnswers.length) {
-        initialAnswers[index] = answer;
+    generateQuizRoundsAsync(lessonId).then((generated) => {
+      const quizRounds = generated.map((round, index) => ({
+        ...round,
+        isLocked: !hasUnlockedRound(lessonId, index),
+      }));
+      const round = quizRounds.find(r => r.id === roundId);
+    
+      if (!round) {
+        navigate(`/aula/${lessonId}/quiz`);
+        return;
       }
+
+      // Verificar se a rodada está desbloqueada
+      if (round.isLocked) {
+        navigate(`/aula/${lessonId}/quiz`);
+        return;
+      }
+
+      setCurrentRound(round);
+      setQuestionIndex(0);
+
+      // Carregar respostas salvas
+      const savedAnswers = loadCurrentAnswers(lessonId, roundId);
+      const initialAnswers = new Array(round.questions.length).fill(-1);
+      savedAnswers.forEach((answer, index) => {
+        if (index < initialAnswers.length) {
+          initialAnswers[index] = answer;
+        }
+      });
+      setAnswers(initialAnswers);
     });
-    setAnswers(initialAnswers);
   }, [lessonId, roundId, navigate]);
 
   const handleAnswerChange = (qIndex: number, answerIndex: number) => {

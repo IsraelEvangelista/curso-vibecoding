@@ -1,34 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, CheckCircle, Clock, Trophy, Lock } from "lucide-react";
-import type { QuizPageProps, QuizRound, QuizRoundAttempt } from "@/types";
+import type { QuizPageProps, QuizRoundAttempt } from "@/types";
 import { mockLessons } from "@/lib/mockData";
+import { generateQuizRoundsAsync } from "@/lib/quizLoader";
+import { getRoundStatus, QuizRoundWithProgress } from "@/lib/quizStatus";
 
-// Dados mockados para as rodadas do quiz
-const generateQuizRounds = (lessonId: string): QuizRound[] => {
-  const lesson = mockLessons.find(l => l.id === lessonId);
-  if (!lesson) return [];
-
-  // Dividir as questões em 3 rodadas
-  const questions = lesson.quiz.questions;
-  const roundsPerQuiz = 3;
-  const questionsPerRound = Math.ceil(questions.length / roundsPerQuiz);
-
-  return Array.from({ length: roundsPerQuiz }, (_, roundIndex) => {
-    const startIndex = roundIndex * questionsPerRound;
-    const endIndex = Math.min(startIndex + questionsPerRound, questions.length);
-    const roundQuestions = questions.slice(startIndex, endIndex);
-
-    return {
-      id: `round-${roundIndex + 1}`,
-      title: `Rodada ${roundIndex + 1}`,
-      questions: roundQuestions,
-      maxAttempts: 3,
-      attempts: [], // Será carregado do localStorage
-      isLocked: roundIndex > 0 // Apenas a primeira rodada é desbloqueada inicialmente
-    };
-  });
-};
+// Removido: geração local de rodadas. Usar generateQuizRoundsAsync (carrega markdown para aula1).
 
 // Funções para persistência no localStorage
 const loadRoundAttempts = (lessonId: string, roundId: string): QuizRoundAttempt[] => {
@@ -52,35 +30,35 @@ const hasUnlockedRound = (lessonId: string, roundIndex: number): boolean => {
 
   const previousRoundId = `round-${roundIndex}`;
   const attempts = loadRoundAttempts(lessonId, previousRoundId);
-  return attempts.some(attempt => attempt.score >= 70);
+  const passed = attempts.some((attempt) => attempt.score >= 70);
+  const exhausted = attempts.length >= 3; // liberar após 3 falhas
+  return passed || exhausted;
 };
 
-type QuizRoundWithProgress = QuizRound & {
-  currentAnswered: number;
-};
+// Tipagem compartilhada via módulo quizStatus
 
 export function QuizPage({ lessonId, onExit, onNavigateToSlides, onNavigateToChallenge }: QuizPageProps) {
   const navigate = useNavigate();
   const [rounds, setRounds] = useState<QuizRoundWithProgress[]>([]);
 
   useEffect(() => {
-    const quizRounds = generateQuizRounds(lessonId);
-    
-    // Carregar tentativas anteriores e atualizar status das rodadas
-    const roundsWithAttempts = quizRounds.map((round, index) => {
-      const attempts = loadRoundAttempts(lessonId, round.id);
-      const currentAnswers = loadCurrentRoundAnswers(lessonId, round.id);
-      const currentAnswered = currentAnswers.filter(answer => answer !== -1).length;
+    // Carregar rodadas (com markdown para aula1)
+    generateQuizRoundsAsync(lessonId).then((quizRounds) => {
+      // Carregar tentativas anteriores e atualizar status das rodadas
+      const roundsWithAttempts = quizRounds.map((round, index) => {
+        const attempts = loadRoundAttempts(lessonId, round.id);
+        const currentAnswers = loadCurrentRoundAnswers(lessonId, round.id);
+        const currentAnswered = currentAnswers.filter(answer => answer !== -1).length;
 
-      return {
-        ...round,
-        attempts,
-        isLocked: !hasUnlockedRound(lessonId, index),
-        currentAnswered,
-      };
+        return {
+          ...round,
+          attempts,
+          isLocked: !hasUnlockedRound(lessonId, index),
+          currentAnswered,
+        };
+      });
+      setRounds(roundsWithAttempts);
     });
-    
-    setRounds(roundsWithAttempts);
   }, [lessonId]);
 
   const handleRoundClick = (round: QuizRoundWithProgress) => {
@@ -93,37 +71,7 @@ export function QuizPage({ lessonId, onExit, onNavigateToSlides, onNavigateToCha
     navigate('/aulas');
   };
 
-  const getRoundStatus = (
-    round: QuizRoundWithProgress,
-    bestAttempt: QuizRoundAttempt | null
-  ) => {
-    if (!bestAttempt) {
-      const inProgress = round.currentAnswered > 0;
-      return {
-        status: inProgress ? "Em progresso" : "Não tentado",
-        statusColor: inProgress ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400",
-        badgeColor: inProgress
-          ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
-          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300",
-        answeredText: `${round.currentAnswered}/${round.questions.length}`,
-        answeredLabel: "Respondidas",
-        answeredColor: inProgress ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400",
-      };
-    }
-
-    const passed = bestAttempt.score >= 70;
-
-    return {
-      status: passed ? "Aprovado" : "Tentado",
-      statusColor: passed ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400",
-      badgeColor: passed
-        ? "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"
-        : "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300",
-      answeredText: `${bestAttempt.correctAnswers}/${round.questions.length}`,
-      answeredLabel: "Acertos",
-      answeredColor: passed ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400",
-    };
-  };
+  // getRoundStatus importado de '@/lib/quizStatus'
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#000000]">
@@ -210,14 +158,15 @@ export function QuizPage({ lessonId, onExit, onNavigateToSlides, onNavigateToCha
               const status = getRoundStatus(round, bestAttempt);
               const isLocked = round.isLocked;
               const remainingAttempts = Math.max(round.maxAttempts - round.attempts.length, 0);
+              const exhausted = remainingAttempts <= 0 && !(bestAttempt && bestAttempt.score >= 70);
 
               return (
                 <div
                   key={round.id}
                   className={`card relative overflow-hidden ${
-                    isLocked ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02]'
+                    isLocked || exhausted ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer hover:scale-[1.02]'
                   } transition-all duration-300`}
-                  onClick={() => !isLocked && handleRoundClick(round)}
+                  onClick={() => !(isLocked || exhausted) && handleRoundClick(round)}
                 >
                   {/* Status de Bloqueio */}
                   {isLocked && (
@@ -305,6 +254,7 @@ export function QuizPage({ lessonId, onExit, onNavigateToSlides, onNavigateToCha
                       disabled={isLocked}
                     >
                       {isLocked ? 'Bloqueado' : 
+                       exhausted ? 'Limite de tentativas alcançado' :
                        round.attempts.length > 0 ? 'Tentar novamente' : 
                        'Começar Rodada'}
                     </button>

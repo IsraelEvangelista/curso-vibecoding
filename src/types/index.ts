@@ -41,6 +41,8 @@ export interface QuizQuestion {
   options: string[];
   correctAnswer: number;
   explanation: string;
+  // Campo opcional para origem (markdown) — não exibido na UI
+  difficulty?: "easy" | "medium" | "hard" | "facil" | "medio" | "dificil";
 }
 
 export interface QuizAttempt {
@@ -173,10 +175,14 @@ export interface NavigationItem {
 export interface Slide {
   id: string;
   title: string;
-  content: string;
-  type: "text" | "code" | "image" | "video";
+  content: string | {
+    imageUrl: string;
+    imageAlt: string;
+    text: string;
+  };
+  type: "text" | "code" | "image" | "video" | "image-text";
   order: number;
-  image?: string; // URL da imagem para exibir ao lado do conteúdo
+  image?: string; // URL da imagem para exibir ao lado do conteúdo (legacy)
 }
 
 export interface SlideDeck {
@@ -214,6 +220,7 @@ export interface QuizRound {
   maxAttempts: number;
   attempts: QuizRoundAttempt[];
   isLocked: boolean;
+  requiredScore: number;
 }
 
 export interface QuizRoundAttempt {
@@ -280,6 +287,8 @@ export interface QuizResultModalProps {
   correctAnswers: number;
   timeSpent: number;
   passed: boolean;
+  // Controla exibição do botão de nova tentativa (máx. 3)
+  canRetry?: boolean;
   onRetry: () => void;
   onExit: () => void;
   roundTitle: string;

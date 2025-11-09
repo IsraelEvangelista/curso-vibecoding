@@ -26,6 +26,13 @@ const saveRoundAttempt = (lessonId: string, roundId: string, attempt: QuizRoundA
   clearCurrentAnswers(lessonId, roundId);
 };
 
+const loadRoundAttempts = (lessonId: string, roundId: string): QuizRoundAttempt[] => {
+  if (typeof window === "undefined") return [];
+  const key = `quiz_${lessonId}_${roundId}_attempts`;
+  const stored = localStorage.getItem(key);
+  return stored ? JSON.parse(stored) : [];
+};
+
 export function QuizQuestionViewer({
   round,
   questionIndex,
@@ -271,6 +278,12 @@ export function QuizQuestionViewer({
             correctAnswers={resultData.correctAnswers}
             timeSpent={resultData.timeSpent}
             passed={resultData.passed}
+            canRetry={(() => {
+              const urlParts = window.location.pathname.split('/');
+              const lessonId = urlParts[2];
+              const attempts = loadRoundAttempts(lessonId, round.id);
+              return !resultData.passed && attempts.length < round.maxAttempts;
+            })()}
             onRetry={handleRetry}
             onExit={handleExit}
             roundTitle={round.title}
