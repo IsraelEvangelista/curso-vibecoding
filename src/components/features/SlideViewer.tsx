@@ -118,7 +118,7 @@ const config = {
 > **Importante:** Sempre valide as saídas da IA e mantenha humanos no loop!
       `,
       type: "text",
-      order: 3
+      order:3
     },
     {
       id: "slide-4",
@@ -240,22 +240,60 @@ export function SlideViewer({
   // Navegação com teclado
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Permitir scroll com setas quando não estiver em inputs
+      const activeElement = document.activeElement;
+      const isInput = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        (activeElement as HTMLElement).contentEditable === 'true'
+      );
+
       switch (event.key) {
         case 'ArrowLeft':
-          handlePrevious();
+          if (!isInput) {
+            event.preventDefault();
+            handlePrevious();
+          }
           break;
         case 'ArrowRight':
-          handleNext();
+          if (!isInput) {
+            event.preventDefault();
+            handleNext();
+          }
           break;
         case 'Escape':
-          handleExit();
+          if (!isInput) {
+            event.preventDefault();
+            handleExit();
+          }
+          break;
+        // Permitir scroll natural com setas em inputs
+        default:
+          // Não bloquear outras teclas
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlePrevious, handleNext, handleExit]);
+
+  // Garantir que o scroll funcione mesmo após interações com modais
+  useEffect(() => {
+    // Restaurar overflow do body se necessário
+    const checkAndRestoreScroll = () => {
+      // Verificar se não há modais abertos (baseado na ausência de elementos com z-index alto)
+      const modalsAbertos = document.querySelectorAll('[role="dialog"], .modal-overlay');
+      if (document.body.style.overflow === 'hidden' && modalsAbertos.length === 0) {
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Verificar periodicamente (como fallback)
+    const interval = setInterval(checkAndRestoreScroll, 200);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const canGoPrevious = slideDeck.currentSlideIndex > 0;
   const canGoNext = slideDeck.currentSlideIndex < slideDeck.slides.length - 1;
@@ -321,22 +359,156 @@ export function SlideViewer({
     };
 
     switch (currentSlide.type) {
+      case 'image-text': {
+        const content = typeof currentSlide.content === 'object' ? currentSlide.content : null;
+        if (!content) return null;
+        
+        return (
+          <div className="flex flex-col md:flex-row gap-6 items-start">
+            {/* Conteúdo de texto à esquerda (60% no desktop) */}
+            <div className="md:w-3/5 w-full">
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: (() => {
+                      const removeAccents = (str: string) =>
+                        str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                      const stripLeadingTitle = (content: string, title?: string) => {
+                        if (!title) return content;
+                        const norm = (s: string) =>
+                          removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                        const trimmed = content.replace(/^\s+/, '');
+                        const firstLine = trimmed.split('\n')[0] || '';
+                        const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
+                        if (norm(headingText) === norm(title)) {
+                          const [, ...rest] = trimmed.split('\n');
+                          return rest.join('\n');
+                        }
+                        return content;
+                      };
+                      const escapeHtml = (str: string) =>
+                        str
+                          .replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#39;');
+
+                      // Extract code fences to placeholders
+                      let text = stripLeadingTitle(content.text, currentSlide.title);
+                      const codeBlocks: { lang: string; code: string }[] = [];
+                      text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m: string, lang = '', code: string) => {
+                        const idx = codeBlocks.push({ lang, code }) - 1;
+                        return `__CODEBLOCK_${idx}__`;
+                      });
+
+                      // Tables
+                      text = processMarkdownTable(text);
+
+                      // Inline code with escaping
+                      text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
+                        `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
+                      );
+
+                      // Headings, lists, quotes, bold/italic
+                      text = text
+                        .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
+                        .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
+                        .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-medium mb-3 text-gray-700 dark:text-gray-200">$1</h3>')
+                        .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
+                        .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-6 py-2 mb-4 italic text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg">$1</blockquote>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
+                        .replace(/\n\n/g, '<br><br>');
+
+                      // Restore code blocks safely escaped
+                      text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
+                        const { lang, code } = codeBlocks[Number(i)];
+                        return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                      });
+
+                      return text;
+                    })()
+                  }}
+                />
+              </div>
+            </div>
+            {/* Imagem à direita (40% no desktop) */}
+            <div className="md:w-2/5 w-full flex flex-col items-center justify-center">
+              <img
+                src={content.imageUrl}
+                alt={content.imageAlt}
+                className="w-full h-auto rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          </div>
+        );
+      }
+      
       case 'code':
         return (
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <div 
-              dangerouslySetInnerHTML={{ 
-                __html: processMarkdownTable(currentSlide.content)
-                  .replace(/```(\w+)?\n/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto"><code class="language-$1">')
-                  .replace(/```/g, '</code></pre>')
-                  .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
-                  .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
-                  .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold mb-3">$1</h2>')
-                  .replace(/^### (.*$)/gm, '<h3 class="text-xl font-medium mb-2">$1</h3>')
-                  .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
-                  .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-blue-600 dark:text-blue-400">$1</blockquote>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-                  .replace(/\n\n/g, '<br><br>')
+              dangerouslySetInnerHTML={{
+                __html: (() => {
+                  const removeAccents = (str: string) =>
+                    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                  const stripLeadingTitle = (content: string, title?: string) => {
+                    if (!title) return content;
+                    const norm = (s: string) =>
+                      removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                    const trimmed = content.replace(/^\s+/, '');
+                    const firstLine = trimmed.split('\n')[0] || '';
+                    const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
+                    if (norm(headingText) === norm(title)) {
+                      const [, ...rest] = trimmed.split('\n');
+                      return rest.join('\n');
+                    }
+                    return content;
+                  };
+                  const escapeHtml = (str: string) =>
+                    str
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;');
+
+                  // Extract code fences to placeholders
+                  const contentText = typeof currentSlide.content === 'string' ? currentSlide.content : '';
+                  let text = stripLeadingTitle(contentText, currentSlide.title);
+                  const codeBlocks: { lang: string; code: string }[] = [];
+                  text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m: string, lang = '', code: string) => {
+                    const idx = codeBlocks.push({ lang, code }) - 1;
+                    return `__CODEBLOCK_${idx}__`;
+                  });
+
+                  // Tables
+                  text = processMarkdownTable(text);
+
+                  // Inline code with escaping
+                  text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
+                    `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
+                  );
+
+                  // Headings, lists, quotes, bold
+                  text = text
+                    .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
+                    .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold mb-3">$1</h2>')
+                    .replace(/^### (.*$)/gm, '<h3 class="text-xl font-medium mb-2">$1</h3>')
+                    .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
+                    .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-blue-600 dark:text-blue-400">$1</blockquote>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+                    .replace(/\n\n/g, '<br><br>');
+
+                  // Restore code blocks safely escaped
+                  text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
+                    const { lang, code } = codeBlocks[Number(i)];
+                    return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                  });
+
+                  return text;
+                })()
               }}
             />
           </div>
@@ -347,19 +519,67 @@ export function SlideViewer({
         return (
           <div className="prose prose-lg dark:prose-invert max-w-none">
             <div 
-              dangerouslySetInnerHTML={{ 
-                __html: processMarkdownTable(currentSlide.content)
-                  .replace(/```(\w+)?\n/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto"><code class="language-$1">')
-                  .replace(/```/g, '</code></pre>')
-                  .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">$1</code>')
-                  .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
-                  .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
-                  .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-medium mb-3 text-gray-700 dark:text-gray-200">$1</h3>')
-                  .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
-                  .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-6 py-2 mb-4 italic text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg">$1</blockquote>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
-                  .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
-                  .replace(/\n\n/g, '<br><br>')
+              dangerouslySetInnerHTML={{
+                __html: (() => {
+                  const removeAccents = (str: string) =>
+                    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                  const stripLeadingTitle = (content: string, title?: string) => {
+                    if (!title) return content;
+                    const norm = (s: string) =>
+                      removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                    const trimmed = content.replace(/^\s+/, '');
+                    const firstLine = trimmed.split('\n')[0] || '';
+                    const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
+                    if (norm(headingText) === norm(title)) {
+                      const [, ...rest] = trimmed.split('\n');
+                      return rest.join('\n');
+                    }
+                    return content;
+                  };
+                  const escapeHtml = (str: string) =>
+                    str
+                      .replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#39;');
+
+                  // Extract code fences to placeholders
+                  const slideContentText = typeof currentSlide.content === 'string' ? currentSlide.content : '';
+                  let text = stripLeadingTitle(slideContentText, currentSlide.title);
+                  const codeBlocks: { lang: string; code: string }[] = [];
+                  text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m: string, lang = '', code: string) => {
+                    const idx = codeBlocks.push({ lang, code }) - 1;
+                    return `__CODEBLOCK_${idx}__`;
+                  });
+
+                  // Tables
+                  text = processMarkdownTable(text);
+
+                  // Inline code with escaping
+                  text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
+                    `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
+                  );
+
+                  // Headings, lists, quotes, bold/italic
+                  text = text
+                    .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
+                    .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
+                    .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-medium mb-3 text-gray-700 dark:text-gray-200">$1</h3>')
+                    .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
+                    .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-6 py-2 mb-4 italic text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg">$1</blockquote>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
+                    .replace(/\n\n/g, '<br><br>');
+
+                  // Restore code blocks safely escaped
+                  text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
+                    const { lang, code } = codeBlocks[Number(i)];
+                    return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                  });
+
+                  return text;
+                })()
               }}
             />
           </div>
@@ -394,7 +614,7 @@ export function SlideViewer({
             </div>
 
             {/* Conteúdo do slide */}
-            <div className="slide-content flex-1 overflow-y-auto pr-4">
+            <div className="slide-content flex-1 overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain' }}>
               {currentSlide?.image ? (
                 <div className="flex flex-col md:flex-row gap-6 items-start">
                   {/* Conteúdo à esquerda */}
