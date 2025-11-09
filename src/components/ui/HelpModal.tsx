@@ -20,7 +20,7 @@ const HelpModal = forwardRef<HTMLDivElement, HelpModalProps>(
         // Store previous focus
         previousFocusRef.current = document.activeElement as HTMLElement;
         
-        // Prevent body scroll
+        // Prevent body scroll only for this modal
         document.body.style.overflow = 'hidden';
         
         // Focus modal after a short delay to ensure it's rendered
@@ -32,7 +32,7 @@ const HelpModal = forwardRef<HTMLDivElement, HelpModalProps>(
         // Start animation
         setIsAnimating(true);
       } else {
-        // Restore body scroll
+        // Restore body scroll immediately
         document.body.style.overflow = '';
         
         // Restore focus

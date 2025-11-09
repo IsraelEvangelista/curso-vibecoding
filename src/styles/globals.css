@@ -768,4 +768,39 @@
     .modal-content::-webkit-scrollbar-thumb:hover {
         background: var(--color-border-primary);
     }
+
+    /* Slide Content Scroll Fix */
+    .slide-content {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    /* Ensure scroll works during modal/overlay interactions */
+    .fixed.inset-0 {
+        pointer-events: auto;
+    }
+
+    .fixed.inset-0:has(.modal-overlay) {
+        pointer-events: none;
+    }
+
+    /* Fix for high z-index elements */
+    .slide-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Prevent body scroll lock during modal */
+    body:has(.fixed.inset-0) {
+        overflow: auto;
+    }
+
+    /* Touch scroll optimization */
+    @media (max-width: 768px) {
+        .slide-content {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+    }
 }

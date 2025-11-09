@@ -22,6 +22,29 @@
 - **@architect** – define padrões técnicos e de UX.
 - **@qa** – garante qualidade, cenários de teste e validações.
 
+## Registro de Atividades Recentes
+
+### Validação dos Slides 11–18 da Aula 01
+
+- ✅ Implementação dos slides 11–18 da Aula 01 confirmada como aplicada no deck `deck-aula1` configurado em [`src.lib.mockData.ts`](src/lib/mockData.ts:3161).
+- ✅ Slides acessíveis via fluxo oficial da Aula 01 na interface (entrada pela página de Aulas e navegação para o sistema de slides).
+- ✅ Renderização correta no `SlideViewer` e `SlideHeader` conforme padrões definidos em [`src.components.features.SlideViewer.tsx`](src/components/features/SlideViewer.tsx:1) e [`src.components.features.SlideHeader.tsx`](src/components/features/SlideHeader.tsx:1), incluindo:
+  - Markdown avançado (títulos, listas, ênfases, blocos de código).
+  - Conteúdos de segurança e boas práticas sem quebras de layout ou problemas de escape.
+- ✅ Navegação entre slides (anterior/próximo e indicadores de progresso) funcionando corretamente para o range 11–18, mantendo consistência do rodapé "Slide X de Y".
+- ✅ Ausência de erros de renderização relevantes no console relacionados aos slides 11–18 durante o fluxo de uso padrão.
+- 🔒 Navegação direta para rotas inexistentes continua retornando 404 controlado pelo React Router, comportamento esperado fora do fluxo guiado pela UI.
+
+### Atualização da Aula 01 — Movimentação e Exclusões (Slides 19–25)
+
+- ✅ O conteúdo do **Slide 23 (Recap e Próximos Passos)** foi movido para o **Slide 19**, mantendo o tipo `text` e a estrutura em markdown. O título do slide 19 foi atualizado para "Recap e Próximos Passos".
+- ✅ Os **slides 20 em diante** da Aula 01 (**20, 21, 22, 23, 24 e 25**) foram removidos do array `mockSlidesAula1` em [`src/lib/mockData.ts`](src/lib/mockData.ts), conforme orientação do senhor.
+- 🔁 O rodapé "Slide X de Y" é calculado dinamicamente por `SlideHeader`, então a redução de slides foi refletida automaticamente sem necessidade de ajustes adicionais.
+- 👀 Validação visual em preview realizada com o servidor Vite: `http://localhost:5173/`.
+- 🧩 Integridade verificada: navegação anterior/próximo continua estável até o **Slide 19**; não há referências quebradas aos slides removidos.
+
+Observação: A seção "3.1. Implementação da Aula 01" foi atualizada para refletir a nova contagem total de slides (19).
+
 ## Convenções de Código
 - PascalCase para componentes, camelCase para variáveis/funções.
 - TypeScript em strict mode com tipos explícitos.
@@ -52,7 +75,7 @@ src/
 - `Docs/BUGS.md` – issues registradas.
 - `Docs/ementa.md` – ementa completa das aulas.
 
-## Estado Atual (Atualizado em 2025-11-03)
+## Estado Atual (Atualizado em 2025-11-07)
 
 ### Resumo dos Títulos das Aulas
 
@@ -113,8 +136,8 @@ src/
 - **Rodapé Fixo:** Indicadores de progresso fixados no bottom da página (z-index 11000) com informação "Slide X de Y".
 - **Layout Responsivo:** Container flex com `flex-1` para conteúdo e rodapé separado, garantindo scroll apenas no conteúdo.
 
-#### 3.1. Implementação da Aula 01 (23 Slides Completos)
-- **Fonte de Dados:** `mockSlidesAula1` em `src/lib/mockData.ts` (linhas 510-672) contendo 23 slides detalhados.
+#### 3.1. Implementação da Aula 01 (19 Slides Completos)
+- **Fonte de Dados:** `mockSlidesAula1` em `src/lib/mockData.ts` contendo 19 slides detalhados.
 - **Carregamento:** `AulaSlidePage.tsx` importa `mockSlideDecks` e busca pelo `lessonId` usando `.find()`.
 - **Renderização de Conteúdo:**
   - **Markdown Avançado:** Suporte para headers (#, ##, ###), listas (-, *), blockquotes (>), code blocks (\`\`\`), inline code (\`), bold (\*\*), italic (\*).
@@ -123,7 +146,41 @@ src/
     - Ignora linhas separadoras (---|---)
     - Gera HTML com `<table>`, `<th>` (headers com bg cinza) e `<td>` (células normais)
     - Aplica bordas, padding e estilo dark mode
-  - **Listas sem Marcadores Duplicados:** Usa `list-none` e remove bullets adicionais do regex, respeitando emojis/ícones originais do conteúdo.
+- **Listas sem Marcadores Duplicados:** Usa `list-none` e remove bullets adicionais do regex, respeitando emojis/ícones originais do conteúdo.
+
+##### 3.1.1 Padrão para os novos slides 06–10 (expansão do Slide 05)
+
+Para detalhar os blocos do Slide 05, inserimos 5 slides consecutivos (06–10), cada um focado em um bloco específico. O padrão visual e técnico a ser seguido em cada slide é:
+
+- Estrutura geral:
+  - Título (H1/H2 via markdown):
+    - `# Plataformas de Desenvolvimento com IA`
+    - `## <SUBTÍTULO DO BLOCO>` (ex.: `## 🎨 PLATAFORMAS ALL-IN-ONE`)
+  - Conteúdo em grade de cards utilizando HTML dentro do markdown (suportado pelo renderer atual):
+    - Container: `<div class="grid grid-cols-1 md:grid-cols-2 gap-6"> ... </div>` para 2 colunas (2 cards por linha em telas médias+).
+    - Cada card:
+      - `<div class="rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">`.
+      - Cabeçalho com ícone + nome da ferramenta:
+        - `<div class="flex items-center gap-3"><span class="text-2xl">🔹</span><h3 class="text-xl font-semibold text-gray-900 dark:text-white">Nome</h3></div>`
+      - Descrição curta (1–2 frases):
+        - `<p class="mt-2 text-gray-700 dark:text-gray-300">...</p>`
+      - Link de acesso:
+        - `<a href="URL" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-2 text-green-600 hover:text-green-500 font-medium">Acessar ↗</a>`
+
+- Regras de conteúdo:
+  - Usar emojis como ícones (evita dependências de imagens/logos).
+  - Links sempre com `target="_blank"` e `rel="noopener noreferrer"` (convenção de segurança).
+  - Descrições objetivas e verificadas (quando necessário, pesquisar com MCPs: Firecrawl, Perplexity ou DevTools).
+
+- Observações técnicas do renderer:
+  - O `SlideViewer` permite HTML no tipo `text` (não escapado fora de blocos de código), então as divs/grades/renderizam normalmente.
+  - Tabelas markdown continuam suportadas, mas para "cards" preferir o grid HTML acima.
+  - Inline code (entre crases) é escapado com segurança; evitar inserir HTML em inline code.
+
+- Numeração e impacto:
+  - A inserção de 5 slides entre 05 e 08 deslocará a numeração dos seguintes (ex.: antigo 06/07 serão substituídos; os demais avançam). Faremos o ajuste progressivo conforme cada novo slide for inserido, validando navegação e rodapé.
+
+- Exemplo de referência (Slide 06 – All-in-One) já implementado com: Lovable, Google AI Studio, Manus, MGX, Genspark, Kimi AI, Z.ai e Lumi.
 
 #### 3.2. Implementação da Aula 02 (23 Slides Completos)
 - **Fonte de Dados:** `mockSlidesAula2` em `src/lib/mockData.ts` (linhas 675-836) contendo 23 slides detalhados.
@@ -137,7 +194,71 @@ src/
 - **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula2'`
 - **Funcionalidades:** Mesmo sistema de navegação e renderização da Aula 01
 
-#### 3.3. Estrutura de Documentos das Aulas
+#### 3.3. Implementação da Aula 03 (LLMs para Vibe Coding)
+- **Fonte de Dados:** `mockSlidesAula3` em `src/lib/mockData.ts` (linhas 839-924) contendo 12 slides detalhados.
+- **Estrutura de Conteúdo:** Cobre "LLMs para Vibe Coding (foco em GLM 4.6)" com:
+  - Fundamentos de Large Language Models
+  - GLM 4.6 - O Modelo Principal para Vibe Coding
+  - APIs e UIs Web dos Principais Modelos
+  - Critérios de Escolha de Modelo
+  - Planos e Preços dos Modelos
+  - Demonstração de Interfaces Web
+  - Configuração e Setup com GLM 4.6
+  - Workflows de Desenvolvimento Eficientes
+  - Técnicas de Prompt Engineering para GLM 4.6
+  - Otimização de Contexto com GLM 4.6
+  - Projeto Prático: Sistema de Benchmarking
+  - Conclusão e Próximos Passos
+- **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula3'`
+- **Funcionalidades:** Mesmo sistema de navegação e renderização das Aulas 01 e 02
+
+#### 3.4. Implementação da Aula 04 (Ambientes: TRAE Solo, Warp, CLIs)
+- **Fonte de Dados:** `mockSlidesAula4` em `src/lib/mockData.ts` (linhas 926-1032) contendo 15 slides detalhados.
+- **Estrutura de Conteúdo:** Cobre "Ambientes: TRAE Solo (principal), Warp (demo) + CLIs" com:
+  - Ambientes de Desenvolvimento para Vibe Coding
+  - TRAE Solo - Setup e Configuração
+  - TRAE Solo - Recursos e Workflows
+  - Warp - Terminal Avançado para Vibe Coding
+  - Claude Code 2.0 - CLI e Extension
+  - Kilo Code - Modos para Diferentes Tarefas
+  - Integração com VS Code e Zed
+  - Micro-benchmarks - Metodologia e Métricas
+  - Benchmark 1 - Geração de Testes Unitários
+  - Benchmark 2 - Análise de Stack Trace
+  - Benchmark 3 - Componente React Acessível
+  - Benchmark 4 - SQL Seguro com Paginação
+  - Benchmark 5 - Refatoração para Reduzir Complexidade
+  - Resultados dos Micro-benchmarks
+  - Conclusão - Dominando Ambientes de Vibe Coding
+- **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula4'`
+- **Funcionalidades:** Mesmo sistema de navegação e renderização das Aulas 01, 02 e 03
+
+#### 3.5. Implementação da Aula 05 (Boas Práticas, Git/GitHub & BMAD)
+- **Fonte de Dados:** `mockSlidesAula5` em `src/lib/mockData.ts` (linhas 1034-2453) contendo 23 slides detalhados.
+- **Estrutura de Conteúdo:** Cobre "Boas Práticas, Git/GitHub & BMAD (PRD)" com:
+  - Abertura da Aula 05 e Objetivos Específicos
+  - Git: Conceitos Fundamentais
+  - Configuração de Repositório - Passo a Passo
+  - SSH: Configuração Segura e Confiável
+  - Branches e Estratégias de Merge
+  - Proteção de Secrets: Fundamento da Segurança
+  - .gitignore: A Linha de Defesa do Repositório
+  - LGPD: Conformidade e Proteção de Dados
+  - Higiene de Logs: Rastreabilidade Segura
+  - BMAD: Metodologia para Estruturação Profissional
+  - Business Model Canvas: Mapeando o Negócio
+  - Architecture Design: Do Conceito à Implementação
+  - PRD: Product Requirements Document
+  - User Stories: Narrativas que Orientam Desenvolvimento
+  - Hands-on: Criando Repositório Profissional
+  - Exercício: PRD com Metodologia BMAD
+  - Pipeline CI/CD: Automação Profissional
+  - Síntese: Profissionalização do Desenvolvimento
+  - Materiais de Apoio Disponíveis
+- **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula5'`
+- **Funcionalidades:** Mesmo sistema de navegação e renderização das Aulas 01, 02, 03 e 04
+
+#### 3.6. Estrutura de Documentos das Aulas
 - **Organização:** Cada aula possui estrutura específica em `Contexto/Aula XX/`
 - **Componentes da Aula 02:**
   - `briefing_02.md`: Documento completo de briefing com objetivos, metodologia e critérios de avaliação
@@ -145,14 +266,14 @@ src/
   - `imagens/`: Pasta para armazenar todas as imagens utilizadas na aula (diagramas, screenshots, ilustrações, etc.)
 - **Padrão de Estrutura:** Briefing (conceitos teóricos + critérios) + Aula (conteúdo didático estruturado) + Imagens (recursos visuais da aula)
 
-#### 3.4. Padrão de Conteúdo dos Slides
+#### 3.7. Padrão de Conteúdo dos Slides
 - **Estrutura:** Cada slide possui `id`, `order`, `title`, `type` ('text' | 'code'), `content` (markdown).
 - **Tipos:**
   - `text`: Conteúdo explicativo com formatação rica
   - `code`: Exemplos de código com syntax highlighting via `<pre><code>`
 - **Futuras Melhorias:** Suporte para imagens (`type: 'image'`) e vídeos (`type: 'video'`) será adicionado conforme necessário.
 
-#### 3.5. Padrão para Novas Aulas
+#### 3.8. Padrão para Novas Aulas
 - Seguir estrutura de `mockSlidesAula1` e `mockSlidesAula2` em `mockData.ts`.
 - Manter consistência de markdown: headers, listas, tabelas, code blocks.
 - Criar estrutura de documentos em `Contexto/Aula XX/` com:
@@ -329,3 +450,226 @@ You `MUST` always use this tool when:
 + Before making architectural decisions to understand existing patterns
 + When debugging issues to check for previous solutions
 + Working with unfamiliar parts of the codebase
+## Guia de Implementação do Quiz por Aula (padrão Aula 01)
+
+Este guia documenta como o quiz da Aula 01 foi implementado e estabelece um padrão replicável para as próximas aulas. Foca nas camadas de dados (markdown), parser, geração de rodadas, persistência no localStorage, exibição de status e testes.
+
+### Objetivo
+- Carregar perguntas de um arquivo markdown por aula.
+- Gerar 3 rodadas de 10 questões (30 no total), com opções embaralhadas.
+- Persistir respostas parciais e tentativas por rodada.
+- Desbloquear rodadas com base em aprovação (≥70%) ou esgotamento de tentativas (3 falhas).
+- Padronizar a exibição de status na UI.
+
+### Arquivos e Responsabilidades
+- `Contexto/Aula 01/quiz_01.md`: Fonte de dados (markdown estruturado).
+- `src/lib/quizLoader.ts`:
+  - `loadQuizQuestionsForLesson(lessonId)`: Carrega perguntas da aula (markdown preferencial) ou fallback para `mockLessons`.
+  - `parseStructuredQuizMarkdown(content)`: Parser tolerante para markdown estruturado.
+  - `parseQuizMarkdown(content)`: Parser alternativo para bloco JSON dentro do markdown.
+  - `generateQuizRoundsAsync(lessonId)`: Gera as 3 rodadas com 10 questões cada, embaralhando perguntas e opções.
+- `src/lib/quizStatus.ts`:
+  - `getRoundStatus(round, bestAttempt)`: Padroniza o status exibido: "Não tentado", "Em progresso", "Tentado", "Aprovado", "Falha".
+- `src/pages/QuizPage.tsx`: Lista as rodadas, aplica bloqueio/desbloqueio e mostra progresso.
+- `src/pages/QuizQuestionPage.tsx`: Carrega a rodada selecionada, respostas atuais e navegação entre questões.
+- `src/components/features/QuizQuestionViewer.tsx`: Interação com as questões, cálculo de nota, salvamento de tentativas e modal de resultados.
+
+### Formato do Markdown (Aula 01)
+Cada questão segue este padrão:
+
+```
+### Pergunta 1
+Qual é a definição correta de Prompt-to-Code?
+A) Uma técnica de testes unitários automatizados
+B) Uma técnica de programação assistida por IA...
+C) ...
+D) ...
+**Resposta:** B
+```
+
+Regras do formato:
+- Cabeçalho da questão: `### Pergunta N` (N = 1..30).
+- Texto da questão é o bloco entre o cabeçalho e a primeira opção.
+- Opções iniciam com `A)`, `B)`, `C)`, `D)` e podem conter espaços de indentação.
+- Linha de resposta obrigatória: `**Resposta:** X` onde `X ∈ {A,B,C,D}`.
+- Separadores `---` são ignorados pelo parser; não são necessários.
+
+### Parser estruturado (robusto e tolerante)
+O parser identifica os blocos de perguntas pelos índices dos cabeçalhos `### Pergunta N` e, dentro de cada bloco, extrai texto, opções e resposta:
+
+```ts
+// src/lib/quizLoader.ts
+export function parseStructuredQuizMarkdown(content: string): QuizQuestion[] {
+  const normalized = content.replace(/\r/g, "");
+  const results: QuizQuestion[] = [];
+  let globalIndex = 0;
+
+  const headerRegex = /###\s*Pergunta\s*\d+/gmi;
+  const indices: number[] = [];
+  let headerMatch: RegExpExecArray | null;
+  while ((headerMatch = headerRegex.exec(normalized)) !== null) {
+    indices.push(headerMatch.index);
+  }
+
+  for (let i = 0; i < indices.length; i++) {
+    const start = indices[i];
+    const end = i + 1 < indices.length ? indices[i + 1] : normalized.length;
+    const qBlock = normalized.slice(start, end);
+    const qContent = qBlock.replace(/^###\s*Pergunta\s*\d+\s*\n/i, "");
+
+    const ansMatch = qContent.match(/\*\*Resposta:\*\*\s*([A-D])/i);
+    if (!ansMatch) continue;
+    const correctIndex = ["A","B","C","D"].indexOf(ansMatch[1].toUpperCase());
+    if (correctIndex < 0) continue;
+
+    const firstOptionIndex = qContent.search(/^[A-D]\)\s+/m);
+    const questionText = (firstOptionIndex >= 0 ? qContent.slice(0, firstOptionIndex) : qContent).trim();
+
+    const optionMatches = qContent.match(/^\s*[A-D]\)\s+.*$/gmi) || [];
+    const options = optionMatches.map((line) => line.replace(/^\s*[A-D]\)\s+/, "").trim());
+    if (options.length < 2) continue;
+
+    results.push({
+      id: `aula1-q${++globalIndex}`,
+      question: questionText,
+      options,
+      correctAnswer: correctIndex,
+      explanation: "",
+    });
+  }
+  return results;
+}
+```
+
+Fallback para bloco JSON dentro do markdown:
+
+```ts
+function parseQuizMarkdown(content: string): QuizQuestion[] {
+  const match = content.match(/```json([\s\S]*?)```/i);
+  if (match?.[1]) {
+    const arr = JSON.parse(match[1].trim());
+    return arr.map((q, idx) => ({
+      id: q.id || `aula1-q${idx + 1}`,
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || "",
+      difficulty: q.difficulty,
+    }));
+  }
+  return [];
+}
+```
+
+### Geração de rodadas e embaralhamento
+
+```ts
+export async function generateQuizRoundsAsync(lessonId: string): Promise<QuizRound[]> {
+  const allQuestions = await loadQuizQuestionsForLesson(lessonId);
+  const shuffledQuestions = shuffleArray(allQuestions);
+  const roundsPerQuiz = 3; // 3 rodadas
+  const questionsPerRound = 10; // 10 por rodada
+
+  return Array.from({ length: roundsPerQuiz }, (_, roundIndex) => {
+    const startIndex = roundIndex * questionsPerRound;
+    const endIndex = startIndex + questionsPerRound;
+    const roundQuestions = shuffledQuestions.slice(startIndex, endIndex).map(shuffleOptions);
+    return {
+      id: `round-${roundIndex + 1}`,
+      title: `Rodada ${roundIndex + 1}`,
+      questions: roundQuestions,
+      maxAttempts: 3,
+      attempts: [],
+      isLocked: roundIndex > 0,
+      requiredScore: 70,
+    };
+  });
+}
+```
+
+### Persistência no navegador e chaves
+- Respostas atuais da rodada: `quiz_<lessonId>_<roundId>_current_answers`.
+- Tentativas realizadas: `quiz_<lessonId>_<roundId>_attempts`.
+
+Uso (exemplos):
+```ts
+// Salvar respostas parciais
+localStorage.setItem(`quiz_${lessonId}_${roundId}_current_answers`, JSON.stringify(answers));
+
+// Salvar tentativa concluída
+const key = `quiz_${lessonId}_${roundId}_attempts`;
+const attempts = JSON.parse(localStorage.getItem(key) || '[]');
+attempts.push(attemptData);
+localStorage.setItem(key, JSON.stringify(attempts));
+```
+
+### Regra de desbloqueio das rodadas
+- A Rodada 2 é desbloqueada quando a Rodada 1 estiver "Aprovado" (≥70%) ou quando o aluno esgotar as 3 tentativas sem aprovação.
+- A Rodada 3 segue a mesma regra em relação à Rodada 2.
+
+```ts
+// QuizPage.tsx
+const hasUnlockedRound = (lessonId: string, roundIndex: number): boolean => {
+  if (roundIndex === 0) return true;
+  const previousRoundId = `round-${roundIndex}`;
+  const attempts = loadRoundAttempts(lessonId, previousRoundId);
+  const passed = attempts.some((a) => a.score >= 70);
+  const exhausted = attempts.length >= 3;
+  return passed || exhausted;
+};
+```
+
+### Padronização do Status na UI
+O status por rodada é centralizado em `getRoundStatus`:
+
+```ts
+type RoundStatusUI = {
+  status: string; // "Não tentado" | "Em progresso" | "Tentado" | "Aprovado" | "Falha"
+  statusColor: string;
+  badgeColor: string;
+  answeredText: string; // "X/Y" ou "Acertos"
+  answeredLabel: string; // "Respondidas" ou "Acertos"
+  answeredColor: string;
+};
+
+export function getRoundStatus(round, bestAttempt): RoundStatusUI { /* ... */ }
+```
+
+### Testes Unitários
+- Parser: `src/lib/__tests__/quizLoader.test.ts` valida que o arquivo markdown possui 30 questões e que cada questão tem pelo menos 2 opções e índice de resposta válido.
+- Status: `src/lib/__tests__/quizStatus.test.ts` garante os rótulos/categorias nos estados limites.
+
+Exemplo de teste do parser:
+```ts
+import { parseStructuredQuizMarkdown } from '@/lib/quizLoader';
+import fs from 'fs';
+import path from 'path';
+
+it('carrega 30 questões do markdown da Aula 01', () => {
+  const filePath = path.resolve(process.cwd(), 'Contexto', 'Aula 01', 'quiz_01.md');
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const questions = parseStructuredQuizMarkdown(content);
+  expect(questions.length).toBe(30);
+});
+```
+
+### Passo a Passo para novas aulas (Aula N)
+1. Criar `Contexto/Aula NN/quiz_NN.md` seguindo o formato acima.
+2. Atualizar `loadQuizQuestionsForLesson(lessonId)` para reconhecer `lessonId === "aulaNN"` e buscar `/Contexto/Aula NN/quiz_NN.md` (com fallback `?raw`).
+3. Executar os testes unitários e, se necessário, adicionar um novo teste específico que valide a contagem de questões da nova aula.
+4. Subir o servidor (`npm run dev`) e validar no Preview que cada rodada exibe 10 questões, que o status muda corretamente e que as chaves do `localStorage` estão sendo criadas.
+5. Se o senhor visualizar divergência (ex.: apenas 5 questões), limpar o cache do `localStorage` e revalidar.
+
+### Checklist (Definition of Done)
+- [ ] 30 questões no markdown e 3 rodadas com 10 questões.
+- [ ] Opções embaralhadas por rodada.
+- [ ] Persistência de respostas e tentativas por `lessonId`/`roundId`.
+- [ ] Desbloqueio conforme regra ≥70% ou 3 falhas.
+- [ ] Status coerente (Não tentado/Em progresso/Tentado/Aprovado/Falha).
+- [ ] Testes unitários passando (`quizLoader.test.ts`, `quizStatus.test.ts`).
+- [ ] Preview validado sem erros.
+
+### Observações de Segurança e Conformidade
+- Não registrar dados sensíveis em logs; usar mensagens sanitizadas.
+- Não expor credenciais; o quiz atual não usa backend.
+- Em futuras integrações (Supabase + RLS), equilibrar segurança com funcionalidade e evitar políticas que bloqueiem leitura das questões para alunos autorizados.

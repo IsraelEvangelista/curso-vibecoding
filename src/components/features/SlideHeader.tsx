@@ -72,7 +72,7 @@ export function SlideHeader({
       ? createPortal(
           <>
             <div
-              className="fixed inset-0 z-[14000]"
+              className="fixed inset-0 z-[14000] bg-black/20 backdrop-blur-sm"
               onClick={() => setIsThemeMenuOpen(false)}
             />
             <div

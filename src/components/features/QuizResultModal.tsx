@@ -19,6 +19,7 @@ export function QuizResultModal({
   correctAnswers,
   timeSpent,
   passed,
+  canRetry,
   onRetry,
   onExit,
   roundTitle
@@ -171,7 +172,9 @@ export function QuizResultModal({
                 }`}>
                   {passed 
                     ? 'Você desbloqueou a próxima rodada! Continue com o excelente trabalho.'
-                    : 'A pontuação mínima para aprovação é 70%. Estude mais um pouco e tente novamente.'
+                    : canRetry === false
+                      ? 'Você atingiu o limite de 3 tentativas nesta rodada. Você pode avançar para a próxima, com status de falha.'
+                      : 'A pontuação mínima para aprovação é 70%. Estude mais um pouco e tente novamente.'
                   }
                 </p>
               </div>
@@ -181,7 +184,7 @@ export function QuizResultModal({
 
         {/* Actions */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 space-x-3">
-          {!passed && (
+          {!passed && canRetry !== false && (
             <button
               onClick={onRetry}
               className="btn-outline flex items-center space-x-2 px-4 py-2"

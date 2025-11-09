@@ -1,0 +1,16 @@
+{
+  "anthropic_direct": {
+    "name": "Claude Code - Anthropic PRO",
+    "description": "Thread usando autenticação direta da conta Anthropic",
+    "model": "claude-3-5-sonnet-20241022",
+    "auth_method": "oauth",
+    "base_url": "https://api.anthropic.com"
+  },
+  "z_ai": {
+    "name": "Claude Code - Z.ai",
+    "description": "Thread usando variáveis da Z.ai",
+    "model": "glm-4.6",
+    "base_url": "https://api.z.ai/api/anthropic",
+    "auth_method": "api_key"
+  }
+}
