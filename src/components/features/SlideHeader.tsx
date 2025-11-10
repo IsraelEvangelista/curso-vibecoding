@@ -150,7 +150,7 @@ export function SlideHeader({
               </button>
               
               <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white break-words whitespace-normal">
                   {slideDeck.title}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">

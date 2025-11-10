@@ -744,6 +744,10 @@
         -webkit-backdrop-filter: blur(8px);
     }
 
+    /* Modal target pattern (no-JS) */
+    .modal { display: none; }
+    .modal:target { display: block; }
+
     /* Modal Content Styles */
     .modal-content {
         max-height: 90vh;
@@ -791,9 +795,9 @@
         z-index: 1;
     }
 
-    /* Prevent body scroll lock during modal */
-    body:has(.fixed.inset-0) {
-        overflow: auto;
+    /* Lock body scroll when modal is open to keep viewport fixed */
+    body:has(.modal:target), html:has(.modal:target) {
+        overflow: hidden;
     }
 
     /* Touch scroll optimization */

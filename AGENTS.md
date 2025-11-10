@@ -182,8 +182,8 @@ Para detalhar os blocos do Slide 05, inserimos 5 slides consecutivos (06–10), 
 
 - Exemplo de referência (Slide 06 – All-in-One) já implementado com: Lovable, Google AI Studio, Manus, MGX, Genspark, Kimi AI, Z.ai e Lumi.
 
-#### 3.2. Implementação da Aula 02 (23 Slides Completos)
-- **Fonte de Dados:** `mockSlidesAula2` em `src/lib/mockData.ts` (linhas 675-836) contendo 23 slides detalhados.
+#### 3.2. Implementação da Aula 02 (18 Slides Completos)
+- **Fonte de Dados:** `mockSlidesAula2` em `src/lib/mockData.ts` (linhas 1376-2179) contendo 18 slides detalhados.
 - **Estrutura de Conteúdo:** Cobre "Arquitetura de Agente & Engenharia de Contexto" com:
   - LLM vs. Agente: Conceitos fundamentais
   - Os quatro pilares da arquitetura (Cérebro, Memória, Tools, Contexto)
@@ -193,6 +193,113 @@ Para detalhar os blocos do Slide 05, inserimos 5 slides consecutivos (06–10), 
   - Exercícios práticos com templates de diagrama
 - **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula2'`
 - **Funcionalidades:** Mesmo sistema de navegação e renderização da Aula 01
+
+##### 3.2.1 Padrão visual e técnico — Aula 02 (slides corrigidos até aqui)
+
+Este padrão consolida as correções aplicadas na Aula 02 até o momento e deve ser replicado nos próximos slides para garantir consistência visual e funcional.
+
+1) Card dividido 50/50 (texto à esquerda, imagem à direita)
+- Container externo do card (bordas arredondadas e corte de overflow):
+  - `rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60`
+- Grid interno responsivo (1 coluna no mobile, 2 no desktop):
+  - `grid grid-cols-1 md:grid-cols-2`
+- Separador interno entre as colunas (apenas em md+):
+  - `md:border-l md:border-gray-200 dark:md:border-gray-700`
+- Lado do texto (alinhamento e espaçamento):
+  - `p-5 md:p-6 space-y-3 text-gray-800 dark:text-gray-200`
+- Lado da imagem (fundo preto apenas nesta metade, centrado):
+  - `bg-black dark:bg-black p-4 flex items-center justify-center`
+- Imagem dentro do card (preenchimento da coluna):
+  - Usar `max-w-full w-full h-auto` e preferir `object-cover` com uma altura máxima controlada (ex.: `md:max-h-[320px]`).
+
+Exemplo de markup do card:
+
+```
+<div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+  <div class="grid grid-cols-1 md:grid-cols-2">
+    <!-- Texto à esquerda -->
+    <div class="p-5 md:p-6 space-y-3 text-gray-800 dark:text-gray-200">
+      <h3 class="text-xl font-semibold">AGENTE DE IA</h3>
+      <p class="leading-relaxed">Definição, capacidades e relação com LLMs.</p>
+    </div>
+    <!-- Imagem à direita, com fundo preto e separador interno -->
+    <div class="bg-black p-4 md:border-l md:border-gray-200 dark:md:border-gray-700 flex items-center justify-center">
+      <a href="#modal-agente-full" aria-label="Abrir imagem em zoom">
+        <img src="/Contexto/Aula 02/imagens/agente.png" alt="Ilustração de Agente de IA" class="max-w-full w-full h-auto md:max-h-[320px] object-cover ring-1 ring-white/10" />
+      </a>
+    </div>
+  </div>
+</div>
+```
+
+2) Modal de zoom sem JS (CSS-only), fixo ao viewport
+- Abrir o modal pelo padrão `:target` via `<a href="#modal-id">`.
+- Trancar o scroll do `body/html` quando o modal estiver aberto.
+- Permitir scroll interno do overlay se a imagem exceder o viewport.
+- A imagem em zoom deve caber completamente no viewport usando `object-contain` + `max-h-[80-85vh]`.
+- Acessibilidade: `role="dialog"`, `aria-modal="true"`, botão de fechar acessível, e textos alternativos adequados.
+
+Exemplo de CSS (em `src/styles/globals.css`):
+
+```
+/* Mostrar/ocultar modal via :target */
+.modal { display: none; }
+.modal:target { display: flex; }
+
+/* Trava de scroll do documento quando o modal está direcionado */
+html:has(.modal:target), body:has(.modal:target) {
+  overflow: hidden;
+}
+```
+
+Exemplo de markup do modal (no mesmo slide):
+
+```
+<div id="modal-agente-full" class="modal fixed inset-0 z-[12000] bg-black/80 p-4 flex items-center justify-center overflow-y-auto" role="dialog" aria-modal="true">
+  <!-- Área clicável para fechar -->
+  <a href="#" class="absolute inset-0" aria-label="Fechar"></a>
+  <!-- Conteúdo central -->
+  <div class="relative max-w-[90vw]">
+    <a href="#" class="absolute -top-2 -right-2 bg-white/90 text-black px-3 py-1 rounded-full shadow" aria-label="Fechar">✕</a>
+    <img src="/Contexto/Aula 02/imagens/agente.png" alt="Agente de IA em tamanho completo" class="max-h-[85vh] w-auto object-contain" />
+  </div>
+  <!-- Foco inicial pode ser definido com auto-focus JS futuramente, se necessário -->
+  <!-- Nota: Evitamos JS aqui por simplicidade e segurança do padrão -->
+  <!-- Overlay fora do conteúdo central permanece clicável para fechar -->
+  <!-- Navegação pelo teclado: Esc (implementado globalmente no viewer) fecha modal -->
+</div>
+```
+
+3) Regras complementares de estilo e acessibilidade
+- Sempre incluir `alt` descritivo nas imagens.
+- Evitar dependência de índices em repetição: quando houver listas dinâmicas, usar `key` semântica.
+- Links externos: `target="_blank"` com `rel="noopener noreferrer"`.
+- Em conteúdo HTML dentro do markdown, manter classes Tailwind coerentes com o tema (cores `text-gray-*`, `dark:*`).
+- Para títulos e descrições, manter hierarquia visual (`text-xl`/`font-semibold` para títulos, `leading-relaxed` para parágrafos).
+- Ajustar `md:max-h` das imagens conforme necessidade do slide para proporção ideal sem estourar o card.
+
+4) Responsividade e alinhamento
+- No mobile: o card divide em 1 coluna (texto acima da imagem), mantendo o fundo preto somente na metade da imagem.
+- Em md+: manter 2 colunas 50/50 e o separador interno visível (`md:border-l`).
+- Centralização vertical da imagem com `flex items-center justify-center` garante apresentação uniforme.
+
+5) Padrão de interação para imagens
+- Clique na imagem abre o modal; clique fora (overlay) fecha.
+- Botão explícito de fechar no canto superior do conteúdo do modal para acessibilidade.
+- Evitar que o modal cause scroll no documento — scroll apenas interno ao overlay.
+
+6) Observações de segurança e conformidade
+- Não expor segredos em conteúdo/links.
+- Seguir princípio de menor privilégio nas rotas de visualização.
+- Registrar NFRs (latência/throughput) apenas em logs sanitizados se necessário; não logar dados sensíveis.
+
+Checklist de replicação (Definition of Done para novos slides da Aula 02)
+- [ ] Card com `rounded-2xl` + `overflow-hidden` e separador interno (`md:border-l`).
+- [ ] Texto à esquerda com `p-5 md:p-6` e tipografia consistente.
+- [ ] Imagem à direita com fundo `bg-black`, centralizada, e dimensões controladas.
+- [ ] Modal CSS-only funcionando (abre/fecha, imagem cabe no viewport, scroll trancado no body, scroll interno no overlay quando necessário).
+- [ ] Acessibilidade: `alt`, `role="dialog"`, `aria-modal="true"`, botão de fechar acessível.
+- [ ] Validação em Preview (`http://localhost:8080/`) sem erros/warnings no console.
 
 #### 3.3. Implementação da Aula 03 (LLMs para Vibe Coding)
 - **Fonte de Dados:** `mockSlidesAula3` em `src/lib/mockData.ts` (linhas 839-924) contendo 12 slides detalhados.
