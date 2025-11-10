@@ -14,7 +14,10 @@
 .trae/
 
 # Documentation
-/Contexto/
+/Contexto/*.md
+/Contexto/**/*.md
+!/Contexto/**/assets/
+!/Contexto/**/imagens/
 /Docs/
 
 # Logs
