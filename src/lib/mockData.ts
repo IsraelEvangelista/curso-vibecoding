@@ -1421,7 +1421,7 @@ export const mockSlidesAula2: Slide[] = [
       <!-- Imagem com fundo preto e divisão -->
       <div class="bg-black/80 dark:bg-black p-5 md:p-6 flex items-center justify-center md:border-l border-gray-200 dark:border-gray-700">
         <a href="#modal-llms" aria-label="Ampliar imagem de LLM" class="block">
-          <img src="/Contexto/Aula 02/assets/llms.jpg" alt="LLM (Large Language Model)"
+          <img src="/Contexto/Aula%2002/assets/llms.jpg" alt="LLM (Large Language Model)"
                class="max-w-full h-auto max-h-[520px] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ring-1 ring-gray-200/70 dark:ring-gray-700/60 object-cover" />
         </a>
       </div>
@@ -1454,7 +1454,7 @@ export const mockSlidesAula2: Slide[] = [
       <!-- Imagem com fundo preto e divisão -->
       <div class="bg-black/80 dark:bg-black p-5 md:p-6 flex items-center justify-center md:border-l border-gray-200 dark:border-gray-700">
         <a href="#modal-agente" aria-label="Ampliar imagem de Agente de IA" class="block">
-          <img src="/Contexto/Aula 02/assets/agents.jpg" alt="Agente de IA"
+          <img src="/Contexto/Aula%2002/assets/agents.jpg" alt="Agente de IA"
                class="max-w-full h-auto max-h-[520px] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 ring-1 ring-gray-200/70 dark:ring-gray-700/60 object-cover" />
         </a>
       </div>
@@ -1466,7 +1466,7 @@ export const mockSlidesAula2: Slide[] = [
 <div id="modal-llms" class="modal fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm p-4 md:p-6 overflow-y-auto" role="dialog" aria-modal="true">
   <div class="modal-content relative mx-auto max-w-5xl min-h-screen flex items-center justify-center">
     <a href="#" class="absolute top-4 right-4 rounded-full bg-white/90 dark:bg-[#111]/90 text-gray-900 dark:text-white px-3 py-2 shadow focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Fechar modal">Fechar ✕</a>
-    <img src="/Contexto/Aula 02/assets/llms.jpg" alt="LLM ampliada" class="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl" />
+    <img src="/Contexto/Aula%2002/assets/llms.jpg" alt="LLM ampliada" class="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl" />
   </div>
   <a href="#" class="absolute inset-0" aria-hidden="true"></a>
 </div>
@@ -1474,7 +1474,7 @@ export const mockSlidesAula2: Slide[] = [
 <div id="modal-agente" class="modal fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm p-4 md:p-6 overflow-y-auto" role="dialog" aria-modal="true">
   <div class="modal-content relative mx-auto max-w-5xl min-h-screen flex items-center justify-center">
     <a href="#" class="absolute top-4 right-4 rounded-full bg-white/90 dark:bg-[#111]/90 text-gray-900 dark:text-white px-3 py-2 shadow focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Fechar modal">Fechar ✕</a>
-    <img src="/Contexto/Aula 02/assets/agents.jpg" alt="Agente de IA ampliada" class="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl" />
+    <img src="/Contexto/Aula%2002/assets/agents.jpg" alt="Agente de IA ampliada" class="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl" />
   </div>
   <a href="#" class="absolute inset-0" aria-hidden="true"></a>
 </div>
@@ -1511,7 +1511,7 @@ export const mockSlidesAula2: Slide[] = [
 
   <!-- Linha 2: Imagem ocupando as duas colunas -->
   <div class="md:col-span-2">
-    <img src="/Contexto/Aula 02/assets/agente_exemplo.jpg" alt="Arquitetura de Agente — exemplo visual"
+    <img src="/Contexto/Aula%2002/assets/agente_exemplo.jpg" alt="Arquitetura de Agente — exemplo visual"
          class="max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 object-contain" />
   </div>
 
@@ -1576,7 +1576,7 @@ export const mockSlidesAula2: Slide[] = [
 
   <!-- Linha 2: Imagem central ocupando 2 colunas -->
   <div class="md:col-span-2">
-    <img src="/Contexto/Aula 02/assets/llm_brain.jpg" alt="Cérebro (LLM) — exemplo visual"
+    <img src="/Contexto/Aula%2002/assets/llm_brain.jpg" alt="Cérebro (LLM) — exemplo visual"
          class="max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 object-contain" />
   </div>
 
@@ -1704,7 +1704,7 @@ export const mockSlidesAula2: Slide[] = [
 
   <!-- Linha 2: Imagem central ocupando 2 colunas -->
   <div class="md:col-span-2">
-    <img src="/Contexto/Aula 02/assets/tools.jpg" alt="Ferramentas do Agente — visão geral"
+    <img src="/Contexto/Aula%2002/assets/tools.jpg" alt="Ferramentas do Agente — visão geral"
          class="max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 object-contain" />
   </div>
 
@@ -1773,7 +1773,7 @@ export const mockSlidesAula2: Slide[] = [
 
   <!-- Linha 2: Imagem central ocupando 2 colunas -->
   <div class="md:col-span-2">
-    <img src="/Contexto/Aula 02/assets/contexto_mem.jpg" alt="Contexto — visão geral (primeira imagem)"
+    <img src="/Contexto/Aula%2002/assets/contexto_mem.jpg" alt="Contexto — visão geral (primeira imagem)"
          class="max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 object-contain" />
   </div>
 
@@ -1801,7 +1801,7 @@ export const mockSlidesAula2: Slide[] = [
 
   <!-- Linha 3.5: Imagem intermediária ocupando 2 colunas -->
   <div class="md:col-span-2">
-    <img src="/Contexto/Aula 02/assets/context.jpg" alt="Contexto — imagem intermediária"
+    <img src="/Contexto/Aula%2002/assets/context.jpg" alt="Contexto — imagem intermediária"
          class="max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 object-contain" />
   </div>
 
