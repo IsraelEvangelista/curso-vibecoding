@@ -319,6 +319,89 @@ Checklist de replicação (Definition of Done para novos slides da Aula 02)
 - **Integração:** Adicionado ao `mockSlideDecks` com `lessonId: 'aula3'`
 - **Funcionalidades:** Mesmo sistema de navegação e renderização das Aulas 01 e 02
 
+##### 3.3.1 Solução Especial: Cards Lado a Lado no Slide 02 (GLM 4.6 vs MiniMax M2)
+
+**Problema Identificado:**
+O Slide 02 da Aula 03 apresentava dois cards de comparação (GLM 4.6 e MiniMax M2) que precisavam ser exibidos lado a lado em duas colunas iguais de 50% cada, mas o processamento padrão de markdown/HTML estava causando empilhamento vertical ou problemas de layout.
+
+**Causa Raiz:**
+O conteúdo markdown com HTML embutido estava sendo processado pelo prose class do Tailwind Typography, que sobrescreve os estilos de grid e flex, causando quebra do layout de duas colunas.
+
+**Solução Implementada:**
+Criação de um componente React dedicado que bypassa o processamento de markdown:
+
+1. **Componente React Dedicado** (`src/components/features/ComparisonCards.tsx`):
+   - Componente puro React sem dependência de markdown
+   - Grid layout com `grid grid-cols-2 gap-6` para garantir duas colunas iguais
+   - Altura fixa de 650px para cada card (`h-[650px]`)
+   - Scroll individual em cada card quando conteúdo excede altura (`overflow-y-auto flex-1`)
+   - Estrutura:
+     ```tsx
+     <div className="grid grid-cols-2 gap-6">
+       <div className="flex flex-col h-[650px] rounded-2xl border ...">
+         <h3>GLM 4.6</h3>
+         <div className="overflow-y-auto flex-1 pr-2">
+           {/* conteúdo com scroll */}
+         </div>
+       </div>
+       <div className="flex flex-col h-[650px] rounded-2xl border ...">
+         <h3>MiniMax M2</h3>
+         <div className="overflow-y-auto flex-1 pr-2">
+           {/* conteúdo com scroll */}
+         </div>
+       </div>
+     </div>
+     ```
+
+2. **Renderização Condicional** (`src/components/features/SlideViewer.tsx`):
+   - Detecta quando `currentSlide.id === 'aula3-slide2'`
+   - Renderiza o `ComparisonCards` diretamente no lugar do processamento de markdown
+   - Mantém o `SlideHeader` para título e navegação
+   - Código (linhas 306-316):
+     ```tsx
+     if (currentSlide.id === 'aula3-slide2') {
+       return (
+         <div className="flex-1 overflow-y-auto pb-10">
+           <SlideHeader title={currentSlide.title} />
+           <div className="container mx-auto px-4 py-6">
+             <ComparisonCards />
+           </div>
+         </div>
+       );
+     }
+     ```
+
+3. **CSS Override** (`src/styles/globals.css`, linhas 811-827):
+   - Força grid e flex layouts dentro de prose para casos futuros
+   - Garante que `grid-cols-2` seja respeitado:
+     ```css
+     .prose div[class*="grid"] { display: grid !important; }
+     .prose div[class*="grid-cols-2"] { 
+       grid-template-columns: repeat(2, minmax(0, 1fr)) !important; 
+     }
+     ```
+
+**Resultado Final:**
+- ✅ Cards GLM 4.6 e MiniMax M2 perfeitamente alinhados lado a lado
+- ✅ Largura exata de 50% para cada card (660px cada em viewport de 1344px)
+- ✅ Altura fixa de 650px com scroll individual
+- ✅ Sem subtítulo duplicado (removido do mockData.ts linha 2232)
+- ✅ Layout responsável e consistente com o tema dark/light
+
+**Validação:**
+- Testes realizados com Chrome DevTools MCP
+- Verificado posicionamento com `getBoundingClientRect()`:
+  - Card 1: left = 80px, width = 660.4px
+  - Card 2: left = 764.4px, width = 660.4px
+- Screenshot confirmando layout correto
+
+**Padrão Replicável:**
+Para futuros slides com layouts complexos que não funcionam bem com markdown:
+1. Criar componente React dedicado em `src/components/features/`
+2. Adicionar renderização condicional em `SlideViewer.tsx` baseado em `slide.id`
+3. Garantir que o componente use Tailwind classes consistentes com o tema
+4. Testar com Chrome DevTools para validar posicionamento pixel-perfect
+
 #### 3.4. Implementação da Aula 04 (Ambientes: TRAE Solo, Warp, CLIs)
 - **Fonte de Dados:** `mockSlidesAula4` em `src/lib/mockData.ts` (linhas 926-1032) contendo 15 slides detalhados.
 - **Estrutura de Conteúdo:** Cobre "Ambientes: TRAE Solo (principal), Warp (demo) + CLIs" com:

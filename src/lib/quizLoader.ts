@@ -25,7 +25,7 @@ export async function loadQuizQuestionsForLesson(lessonId: string): Promise<Quiz
       const mdImportPath = "@/Contexto/Aula 01/quiz_01.md?raw";
       try {
         // @vite-ignore evita pré-transform erro quando o arquivo não existe
-        const mod: any = await import(/* @vite-ignore */ mdImportPath as any);
+        const mod: { default?: string } | string = await import(/* @vite-ignore */ mdImportPath);
         const content = typeof mod === "string" ? mod : mod?.default ?? "";
         let parsed = parseStructuredQuizMarkdown(content);
         if (parsed.length === 0) {
@@ -76,7 +76,7 @@ function parseQuizMarkdown(content: string): QuizQuestion[] {
         correctAnswer: q.correctAnswer,
         explanation: q.explanation || "",
         // Campo opcional difficulty é suportado pela tipagem (oculto no UI)
-        difficulty: (q as any).difficulty,
+        difficulty: q.difficulty,
       } as QuizQuestion));
     }
   } catch (e) {

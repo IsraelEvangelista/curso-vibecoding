@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { SlideHeader } from "./SlideHeader";
-import type { SlideViewerProps, SlideDeck } from "@/types";
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SlideDeck } from '../../types';
+import { ComparisonCards } from './ComparisonCards';
+import { SlideHeader } from './SlideHeader';
+import type { SlideViewerProps } from "@/types";
 
 // Dados mockados para demonstração
 const mockSlides: SlideDeck = {
@@ -302,6 +304,11 @@ export function SlideViewer({
   const renderSlideContent = () => {
     if (!currentSlide) return null;
 
+    // Renderização especial para o slide de comparação GLM 4.6 vs MiniMax M2
+    if (currentSlide.id === 'aula3-slide2') {
+      return <ComparisonCards />;
+    }
+
     // Função para processar tabelas markdown
     const processMarkdownTable = (content: string): string => {
       const lines = content.split('\n');
@@ -517,7 +524,7 @@ export function SlideViewer({
       case 'text':
       default:
         return (
-          <div className="prose prose-lg dark:prose-invert max-w-none">
+          <div className="prose prose-lg dark:prose-invert max-w-none [&>div[class*='grid']]:!grid [&>div[class*='flex']]:!flex">
             <div 
               dangerouslySetInnerHTML={{
                 __html: (() => {
