@@ -2229,17 +2229,20 @@ export const mockSlidesAula3: Slide[] = [
     order: 2,
     title: "Melhor Custo Benefício para o Vibe Coding",
     type: "text",
-    content: `<!-- Container principal com duas colunas lado a lado (sempre na mesma linha, sem quebra) -->
-<div class="grid grid-cols-2 gap-6 mb-6">
+    content: `## Melhor Custo Benefício para o Vibe Coding
+
+<!-- Container principal com duas colunas lado a lado (sempre na mesma linha, sem quebra) -->
+<div class="flex flex-row flex-nowrap items-stretch gap-6 mb-6 overflow-x-auto">
 
   <!-- Coluna Esquerda: GLM 4.6 -->
-  <div class="flex flex-col h-[650px] rounded-2xl border border-gray-200 dark:border-gray-700 p-5 md:p-6 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+  <div class="w-1/2 shrink-0">
+    <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 md:p-6 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60 h-full">
     <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-1">GLM 4.6</h3>
     <p class="text-sm uppercase tracking-wide text-green-500 font-semibold mb-3">
       Modelo principal recomendado para Vibe Coding
     </p>
 
-    <div class="space-y-3 text-sm text-gray-800 dark:text-gray-200 break-words leading-relaxed overflow-y-auto flex-1 pr-2">
+    <div class="space-y-3 text-sm text-gray-800 dark:text-gray-200">
       <div>
         <strong class="text-green-600 dark:text-green-400">Arquitetura:</strong>
         <p class="mt-1">Mixture-of-Experts (MoE) com 355B parâmetros totais, 32B ativos por forward pass. Roteamento seletivo para ativação especializada e otimização de inferência.</p>
@@ -2303,13 +2306,14 @@ export const mockSlidesAula3: Slide[] = [
   </div>
 
   <!-- Coluna Direita: MiniMax M2 -->
-  <div class="flex flex-col h-[650px] rounded-2xl border border-gray-200 dark:border-gray-700 p-5 md:p-6 shadow-sm bg-white/80 dark:bg-[#050505]/80">
+  <div class="w-1/2 shrink-0">
+    <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 md:p-6 shadow-sm bg-white/80 dark:bg-[#050505]/80 h-full">
     <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-1">MiniMax M2</h3>
     <p class="text-sm uppercase tracking-wide text-amber-400 font-semibold mb-3">
       Especialista em agentes complexos e raciocínio intercalado
     </p>
 
-    <div class="space-y-3 text-sm text-gray-800 dark:text-gray-200 break-words leading-relaxed overflow-y-auto flex-1 pr-2">
+    <div class="space-y-3 text-sm text-gray-800 dark:text-gray-200">
       <div>
         <strong class="text-amber-500 dark:text-amber-400">Arquitetura:</strong>
         <p class="mt-1">Interleaved Reasoning com alternância pensar→agir→pensar. Preserva trace de raciocínio entre 200-300 tool calls sequenciais.</p>
@@ -2364,7 +2368,7 @@ export const mockSlidesAula3: Slide[] = [
 </div>
 
 <!-- Cards de decisão em linha única com 3 colunas -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+<div class="grid grid-cols-1 gap-4 text-xs md:grid-cols-2">
   <div class="rounded-xl border border-gray-200 dark:border-gray-700 p-4 bg-white/80 dark:bg-[#0b0b0b]/80">
     <h4 class="font-semibold text-green-600 mb-2 flex items-center gap-2">
       <span class="text-lg">🎯</span> Para o curso e dia a dia
@@ -2394,6 +2398,155 @@ export const mockSlidesAula3: Slide[] = [
   {
     id: "aula3-slide3",
     order: 3,
+    title: "Modelos Top Players para o Vibe Coding",
+    type: "text",
+    content: `## Modelos Top Players para o Vibe Coding
+
+### Visão Geral do Mercado
+
+O mercado de LLMs para desenvolvimento de software em 2025 está dominado por quatro principais players, cada um com características únicas que os tornam ideais para diferentes cenários de Vibe Coding:
+
+<div class="grid grid-cols-2 gap-6 my-6" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5rem;">
+  <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <span class="text-2xl">🚀</span> Kimi K2 Thinking
+    </h4>
+    <div class="space-y-2 text-sm text-gray-800 dark:text-gray-200">
+      <p><strong class="text-blue-600 dark:text-blue-400">Posicionamento:</strong> Líder open-source com parity frontier</p>
+      <p><strong class="text-blue-600 dark:text-blue-400">Destaque:</strong> 67 pontos no Intelligence Index (2º lugar geral, 1º open-source)</p>
+      <p><strong class="text-blue-600 dark:text-blue-400">Diferencial:</strong> 200-300 tool calls sequenciais sem degradação</p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <span class="text-2xl">⚡</span> GPT-5
+    </h4>
+    <div class="space-y-2 text-sm text-gray-800 dark:text-gray-200">
+      <p><strong class="text-green-600 dark:text-green-400">Posicionamento:</strong> Líder proprietário frontier</p>
+      <p><strong class="text-green-600 dark:text-green-400">Destaque:</strong> 68 pontos no Intelligence Index (1º lugar geral)</p>
+      <p><strong class="text-green-600 dark:text-green-400">Diferencial:</strong> 4 níveis de reasoning configuráveis (High/Medium/Low/Minimal)</p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <span class="text-2xl">🎯</span> Claude Sonnet 4.5
+    </h4>
+    <div class="space-y-2 text-sm text-gray-800 dark:text-gray-200">
+      <p><strong class="text-purple-600 dark:text-purple-400">Posicionamento:</strong> Melhor para coding production-ready</p>
+      <p><strong class="text-purple-600 dark:text-purple-400">Destaque:</strong> 77.2% SWE-Bench Verified (melhor do mercado)</p>
+      <p><strong class="text-purple-600 dark:text-purple-400">Diferencial:</strong> 61.4% OSWorld (único com GUI automation)</p>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm bg-white/80 dark:bg-[#0b0b0b]/60">
+    <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <span class="text-2xl">🏆</span> Claude Opus 4.1
+    </h4>
+    <div class="space-y-2 text-sm text-gray-800 dark:text-gray-200">
+      <p><strong class="text-amber-600 dark:text-amber-400">Posicionamento:</strong> Premium para autonomia estendida</p>
+      <p><strong class="text-amber-600 dark:text-amber-400">Destaque:</strong> 30 horas de operação contínua</p>
+      <p><strong class="text-amber-600 dark:text-amber-400">Diferencial:</strong> 74.5% SWE-Bench + reasoning profundo</p>
+    </div>
+  </div>
+</div>
+
+### Tabela Comparativa: Especificações Técnicas
+
+| Dimensão | Kimi K2 | GPT-5 | Sonnet 4.5 | Opus 4.1 |
+|----------|---------|-------|-----------|----------|
+| **Intelligence Index** | 67 🥈 | 68 🥇 | 50 | N/A |
+| **SWE-Bench Verified** | 71.3% | 74.9% | **77.2%** 🥇 | 74.5% |
+| **Agentic (HLE)** | **44.9%** 🥇 | 41.7% | 32.0% | N/A |
+| **Web Research** | **60.2%** 🥇 | 54.9% | 24.1% | N/A |
+| **Context Window** | 256K | 128-400K | **1M** 🥇 | 200K |
+| **Preço Input** | **$0.60/M** 🥇 | $1.25/M | $3.00/M | $15.00/M |
+| **Preço Output** | **$2.50/M** 🥇 | $10.00/M | $15.00/M | $75.00/M |
+| **Relativo vs Claude** | **4-5%** | 8-10% | 100% | 400% |
+| **Free API Tier** | **3M/dia** 🥇 | Não | Não | Não |
+| **Open-Source** | **Sim** 🥇 | Não | Não | Não |
+
+### Matriz de Decisão para Vibe Coding
+
+<div class="grid grid-cols-2 gap-4 my-6" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;">
+  <div class="rounded-xl border border-blue-200 dark:border-blue-700 p-4 bg-blue-50/50 dark:bg-blue-900/10">
+    <h5 class="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+      <span>💰</span> Escolher Kimi K2 Quando:
+    </h5>
+    <ul class="text-sm text-gray-800 dark:text-gray-200 space-y-1 list-disc pl-5">
+      <li>Orçamento limitado (4-8x mais barato)</li>
+      <li>Tarefas agênticas longas (200-300 tool calls)</li>
+      <li>Transparência e auditoria (open-source)</li>
+      <li>Free tier generoso (3M tokens/dia)</li>
+      <li>Web scraping e research automation</li>
+    </ul>
+  </div>
+
+  <div class="rounded-xl border border-green-200 dark:border-green-700 p-4 bg-green-50/50 dark:bg-green-900/10">
+    <h5 class="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
+      <span>⚖️</span> Escolher GPT-5 Quando:
+    </h5>
+    <ul class="text-sm text-gray-800 dark:text-gray-200 space-y-1 list-disc pl-5">
+      <li>Máxima flexibilidade de raciocínio</li>
+      <li>4 níveis configuráveis (High/Medium/Low/Minimal)</li>
+      <li>Math e raciocínio puro (99.6% AIME)</li>
+      <li>Competitive programming (87% LiveCodeBench)</li>
+      <li>Workloads mistos com routing automático</li>
+    </ul>
+  </div>
+
+  <div class="rounded-xl border border-purple-200 dark:border-purple-700 p-4 bg-purple-50/50 dark:bg-purple-900/10">
+    <h5 class="font-semibold text-purple-900 dark:text-purple-100 mb-2 flex items-center gap-2">
+      <span>🎯</span> Escolher Claude Sonnet 4.5 Quando:
+    </h5>
+    <ul class="text-sm text-gray-800 dark:text-gray-200 space-y-1 list-disc pl-5">
+      <li>Coding production-ready (77.2% SWE-Bench)</li>
+      <li>GUI automation (61.4% OSWorld)</li>
+      <li>Qualidade máxima de output</li>
+      <li>Tool execution paralelo</li>
+      <li>1M token context window</li>
+    </ul>
+  </div>
+
+  <div class="rounded-xl border border-amber-200 dark:border-amber-700 p-4 bg-amber-50/50 dark:bg-amber-900/10">
+    <h5 class="font-semibold text-amber-900 dark:text-amber-100 mb-2 flex items-center gap-2">
+      <span>🏆</span> Escolher Claude Opus 4.1 Quando:
+    </h5>
+    <ul class="text-sm text-gray-800 dark:text-gray-200 space-y-1 list-disc pl-5">
+      <li>Autonomia estendida (30 horas contínuas)</li>
+      <li>Reasoning profundo e complexo</li>
+      <li>Pesquisa acadêmica multi-dia</li>
+      <li>Large refactoring projects</li>
+      <li>Budget não é limitante (5x Sonnet)</li>
+    </ul>
+  </div>
+</div>
+
+### Recomendação Suprema para o Curso
+
+**Stack Ótimo para Vibe Coding em 2025:**
+
+\`\`\`
+Primary: Kimi K2 Thinking ($0.60/$2.50)
+  └─ 80% dos casos de uso
+  └─ Economia 4-8x vs alternativas
+  └─ Free tier generoso para testes
+
+Backup: Claude Sonnet 4.5 (coding crítico)
+  └─ 15% dos casos onde qualidade é crucial
+  └─ Production-ready code generation
+
+Reserve: GPT-5 (problemas math/reasoning hard)
+  └─ 5% dos casos mais complexos
+  └─ Quando flexibility de reasoning é necessária
+\`\`\`
+
+**Resultado:** Cobertura de 99% dos casos de uso com apenas 30% do custo de uma solução Claude-exclusive.`,
+  },
+  {
+    id: "aula3-slide4",
+    order: 4,
     title: "APIs e UIs Web dos Principais Modelos",
     type: "text",
     content:

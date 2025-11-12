@@ -309,6 +309,113 @@ export function SlideViewer({
       return <ComparisonCards />;
     }
 
+    // Renderização especial para o slide 03 — força grid 2 colunas sem interferência de "prose"
+    if (currentSlide.id === 'aula3-slide3' && typeof currentSlide.content === 'string') {
+      const slideContentText = currentSlide.content;
+      // Reaproveita o processamento de tabelas e formatação básica
+      const processed = (() => {
+        const removeAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const stripLeadingTitle = (content: string, title?: string) => {
+          if (!title) return content;
+          const norm = (s: string) => removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+          const trimmed = content.replace(/^\s+/, '');
+          const firstLine = trimmed.split('\n')[0] || '';
+          const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
+          if (norm(headingText) === norm(title)) {
+            const [, ...rest] = trimmed.split('\n');
+            return rest.join('\n');
+          }
+          return content;
+        };
+        const escapeHtml = (str: string) =>
+          str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+        let text = stripLeadingTitle(slideContentText, currentSlide.title);
+        const codeBlocks: { lang: string; code: string }[] = [];
+        text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m: string, lang = '', code: string) => {
+          const idx = codeBlocks.push({ lang, code }) - 1;
+          return `__CODEBLOCK_${idx}__`;
+        });
+
+        // Tabelas (definição local para evitar ordem de inicialização)
+        const processMarkdownTableLocal = (content: string): string => {
+          const lines = content.split('\n');
+          let html = '';
+          let inTable = false;
+          let tableRows: string[] = [];
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('|') && line.endsWith('|')) {
+              if (!inTable) {
+                inTable = true;
+                tableRows = [];
+              }
+              tableRows.push(line);
+              const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
+              if (!nextLine.startsWith('|') || i === lines.length - 1) {
+                html += '<table class="min-w-full border-collapse border border-gray-300 dark:border-gray-700 my-4">';
+                tableRows.forEach((row, idx) => {
+                  const cells = row.split('|').filter(cell => cell.trim());
+                  if (cells.every(cell => /^[\s:-]+$/.test(cell))) {
+                    return;
+                  }
+                  const isHeader = idx === 0;
+                  const tag = isHeader ? 'th' : 'td';
+                  const cellClass = isHeader
+                    ? 'border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-semibold text-left'
+                    : 'border border-gray-300 dark:border-gray-700 px-4 py-2';
+                  html += '<tr>';
+                  cells.forEach(cell => {
+                    html += `<${tag} class="${cellClass}">${cell.trim()}</${tag}>`;
+                  });
+                  html += '</tr>';
+                });
+                html += '</table>';
+                inTable = false;
+              }
+            } else {
+              html += line + '\n';
+            }
+          }
+          return html;
+        };
+        text = processMarkdownTableLocal(text);
+
+        // Inline code
+        text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
+          `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
+        );
+
+        // Headings, listas, citações, bold/italic
+        text = text
+          .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
+          .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
+          .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-medium mb-3 text-gray-700 dark:text-gray-200">$1</h3>')
+          .replace(/^[*-]\s+(.*)$/gm, '<li class="list-none mb-2 text-gray-600 dark:text-gray-300">$1</li>')
+          .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-6 py-2 mb-4 italic text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg">$1</blockquote>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
+          .replace(/\n\n/g, '<br><br>');
+
+        // Restaurar code blocks
+        text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
+          const { lang, code } = codeBlocks[Number(i)];
+          return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+        });
+        return text;
+      })();
+
+      // Importante: sem classe "prose" para não interferir no grid; container com estilo inline garantindo 2 colunas
+      return (
+        <div className="max-w-none">
+          <div
+            dangerouslySetInnerHTML={{ __html: processed }}
+          />
+        </div>
+      );
+    }
+
     // Função para processar tabelas markdown
     const processMarkdownTable = (content: string): string => {
       const lines = content.split('\n');
