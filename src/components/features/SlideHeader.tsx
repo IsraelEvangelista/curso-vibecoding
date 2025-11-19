@@ -202,25 +202,27 @@ export function SlideHeader({
               <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
               {/* Botões de navegação para seções */}
-              <div className="hidden sm:flex items-center space-x-2">
-                <button
-                  onClick={onNavigateToQuiz}
-                  className="btn-outline flex items-center space-x-1 px-3 py-2"
-                  title="Ir para Quiz"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Quiz</span>
-                </button>
+              {false && (
+                <div className="hidden sm:flex items-center space-x-2">
+                  <button
+                    onClick={onNavigateToQuiz}
+                    className="btn-outline flex items-center space-x-1 px-3 py-2"
+                    title="Ir para Quiz"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Quiz</span>
+                  </button>
 
-                <button
-                  onClick={onNavigateToChallenge}
-                  className="btn-outline flex items-center space-x-1 px-3 py-2"
-                  title="Ir para Desafio"
-                >
-                  <Award className="h-4 w-4" />
-                  <span>Desafio</span>
-                </button>
-              </div>
+                  <button
+                    onClick={onNavigateToChallenge}
+                    className="btn-outline flex items-center space-x-1 px-3 py-2"
+                    title="Ir para Desafio"
+                  >
+                    <Award className="h-4 w-4" />
+                    <span>Desafio</span>
+                  </button>
+                </div>
+              )}
 
               {/* Botão de ajuda */}
               <button
@@ -263,27 +265,29 @@ export function SlideHeader({
       </header>
 
       {/* Menu mobile flutuante */}
-      <div className="sm:hidden fixed bottom-4 left-4 right-4 z-[12000] flex justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 flex space-x-2">
-          <button
-            onClick={onNavigateToQuiz}
-            className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
-            title="Ir para Quiz"
-          >
-            <CheckCircle className="h-4 w-4" />
-            <span>Quiz</span>
-          </button>
+      {false && (
+        <div className="sm:hidden fixed bottom-4 left-4 right-4 z-[12000] flex justify-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 flex space-x-2">
+            <button
+              onClick={onNavigateToQuiz}
+              className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
+              title="Ir para Quiz"
+            >
+              <CheckCircle className="h-4 w-4" />
+              <span>Quiz</span>
+            </button>
 
-          <button
-            onClick={onNavigateToChallenge}
-            className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
-            title="Ir para Desafio"
-          >
-            <Award className="h-4 w-4" />
-            <span>Desafio</span>
-          </button>
+            <button
+              onClick={onNavigateToChallenge}
+              className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
+              title="Ir para Desafio"
+            >
+              <Award className="h-4 w-4" />
+              <span>Desafio</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

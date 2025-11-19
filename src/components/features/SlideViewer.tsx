@@ -4,6 +4,8 @@ import { SlideDeck } from '../../types';
 import { ComparisonCards } from './ComparisonCards';
 import { SlideHeader } from './SlideHeader';
 import type { SlideViewerProps } from "@/types";
+import { useSlideNavigation } from '@/hooks/useSlideNavigation';
+import { ProgressIndicator } from './SlideViewer/ProgressIndicator';
 
 // Dados mockados para demonstração
 const mockSlides: SlideDeck = {
@@ -195,25 +197,11 @@ export function SlideViewer({
     setSlideDeck(initialSlideDeck);
   }, [initialSlideDeck]);
 
-  const currentSlide = slideDeck.slides[slideDeck.currentSlideIndex];
-
-  const handlePrevious = useCallback(() => {
-    if (slideDeck.currentSlideIndex > 0) {
-      const newIndex = slideDeck.currentSlideIndex - 1;
-      const updatedSlideDeck = { ...slideDeck, currentSlideIndex: newIndex };
-      setSlideDeck(updatedSlideDeck);
-      onSlideChange(newIndex);
-    }
-  }, [slideDeck, onSlideChange]);
-
-  const handleNext = useCallback(() => {
-    if (slideDeck.currentSlideIndex < slideDeck.slides.length - 1) {
-      const newIndex = slideDeck.currentSlideIndex + 1;
-      const updatedSlideDeck = { ...slideDeck, currentSlideIndex: newIndex };
-      setSlideDeck(updatedSlideDeck);
-      onSlideChange(newIndex);
-    }
-  }, [slideDeck, onSlideChange]);
+  const { currentSlide, canGoPrevious, canGoNext, handlePrevious, handleNext, handleGoToSlide } = useSlideNavigation(
+    slideDeck,
+    (next) => setSlideDeck(next),
+    onSlideChange
+  );
 
   const handleExit = useCallback(() => {
     onExit();
@@ -230,14 +218,7 @@ export function SlideViewer({
     navigate(`/aula/${slideDeck.lessonId}/desafio`);
   }, [onNavigateToChallenge, navigate, slideDeck.lessonId]);
 
-  // Navegar para slide específico
-  const handleGoToSlide = useCallback((slideIndex: number) => {
-    if (slideIndex >= 0 && slideIndex < slideDeck.slides.length) {
-      const updatedSlideDeck = { ...slideDeck, currentSlideIndex: slideIndex };
-      setSlideDeck(updatedSlideDeck);
-      onSlideChange(slideIndex);
-    }
-  }, [slideDeck, onSlideChange]);
+  
 
   // Navegação com teclado
   useEffect(() => {
@@ -297,8 +278,7 @@ export function SlideViewer({
     return () => clearInterval(interval);
   }, []);
 
-  const canGoPrevious = slideDeck.currentSlideIndex > 0;
-  const canGoNext = slideDeck.currentSlideIndex < slideDeck.slides.length - 1;
+  
 
   // Renderizar conteúdo do slide baseado no tipo
   const renderSlideContent = () => {
@@ -476,11 +456,10 @@ export function SlideViewer({
       case 'image-text': {
         const content = typeof currentSlide.content === 'object' ? currentSlide.content : null;
         if (!content) return null;
-        
+        const isAula1Slide3 = currentSlide.id === 'aula1-slide3';
         return (
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* Conteúdo de texto à esquerda (60% no desktop) */}
-            <div className="md:w-3/5 w-full">
+            <div className={isAula1Slide3 ? 'md:w-1/2 w-full' : 'md:w-3/5 w-full'}>
               <div className="prose prose-lg dark:prose-invert max-w-none">
                 <div
                   dangerouslySetInnerHTML={{
@@ -508,23 +487,16 @@ export function SlideViewer({
                           .replace(/"/g, '&quot;')
                           .replace(/'/g, '&#39;');
 
-                      // Extract code fences to placeholders
                       let text = stripLeadingTitle(content.text, currentSlide.title);
                       const codeBlocks: { lang: string; code: string }[] = [];
                       text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m: string, lang = '', code: string) => {
                         const idx = codeBlocks.push({ lang, code }) - 1;
                         return `__CODEBLOCK_${idx}__`;
                       });
-
-                      // Tables
                       text = processMarkdownTable(text);
-
-                      // Inline code with escaping
                       text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
                         `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
                       );
-
-                      // Headings, lists, quotes, bold/italic
                       text = text
                         .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
                         .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
@@ -534,25 +506,21 @@ export function SlideViewer({
                         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
                         .replace(/\n\n/g, '<br><br>');
-
-                      // Restore code blocks safely escaped
                       text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                         const { lang, code } = codeBlocks[Number(i)];
                         return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
                       });
-
                       return text;
                     })()
                   }}
                 />
               </div>
             </div>
-            {/* Imagem à direita (40% no desktop) */}
-            <div className="md:w-2/5 w-full flex flex-col items-center justify-center">
+            <div className={isAula1Slide3 ? 'md:w-1/2 w-full flex flex-col items-center justify-center' : 'md:w-2/5 w-full flex flex-col items-center justify-center'}>
               <img
                 src={content.imageUrl}
                 alt={content.imageAlt}
-                className="w-full h-auto rounded-lg shadow-xl border border-gray-200 dark:border-gray-700"
+                className={isAula1Slide3 ? 'max-w-full w-auto h-auto max-h-[480px] md:max-h-[520px] mx-auto rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 object-contain' : 'w-full h-auto rounded-lg shadow-xl border border-gray-200 dark:border-gray-700'}
               />
             </div>
           </div>
@@ -755,41 +723,7 @@ export function SlideViewer({
         </div>
       </div>
 
-      {/* Rodapé fixo com indicadores de progresso */}
-      <footer className="fixed bottom-0 left-0 right-0 z-[11000] bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Slide {slideDeck.currentSlideIndex + 1} de {slideDeck.slides.length}
-            </div>
-            
-            <div className="flex space-x-2">
-              {slideDeck.slides.map((_, index) => (
-                <div
-                  key={index}
-                  className="relative group"
-                >
-                  <button
-                    onClick={() => handleGoToSlide(index)}
-                    className={`h-2 w-8 rounded-full transition-all cursor-pointer hover:scale-110 ${
-                      index === slideDeck.currentSlideIndex
-                        ? 'bg-green-500 dark:bg-green-400'
-                        : index < slideDeck.currentSlideIndex
-                        ? 'bg-green-300 dark:bg-green-600'
-                        : 'bg-gray-300 dark:bg-gray-600'
-                    }`}
-                    title={`Ir para slide ${index + 1}`}
-                  />
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                    Slide {index + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <ProgressIndicator total={slideDeck.slides.length} current={slideDeck.currentSlideIndex} onGoToSlide={handleGoToSlide} />
     </div>
   );
 }

@@ -24,6 +24,77 @@
 
 ## Registro de Atividades Recentes
 
+### Refatoração de mockData.ts em Módulos Menores (2025-11-12)
+
+**Problema Identificado:**
+O arquivo `src/lib/mockData.ts` continha 4200+ linhas de código com todos os dados mock centralizados, causando:
+- Dificuldade de manutenção e navegação
+- Alto risco de conflitos em merge
+- Tempo de carregamento elevado para o editor
+- Violação do princípio de Single Responsibility
+
+**Solução Implementada:**
+Refatoração completa do arquivo em módulos especializados, mantendo compatibilidade total com código existente.
+
+**Estrutura Final:**
+```
+src/lib/
+├── mockData.ts (23 linhas - apenas shim de compatibilidade)
+└── mocks/
+    ├── index.ts (barrel export)
+    ├── users.ts (mockUsers, mockCurrentUser)
+    ├── quiz.ts (mockQuizQuestions, mockQuizAttempts)
+    ├── lessons.ts (mockLessons)
+    ├── lessonScores.ts (mockLessonScores)
+    ├── ranking.ts (mockRanking)
+    ├── presence.ts (mockPresenceStatus)
+    ├── forum.ts (mockForumTopics)
+    ├── gallery.ts (mockGalleryPosts)
+    ├── slideDecks.ts (mockSlideDecks)
+    └── slides/
+        ├── aula1.ts (mockSlidesAula1 - 68KB)
+        ├── aula2.ts (mockSlidesAula2 - ~45KB)
+        ├── aula3.ts (mockSlidesAula3 - ~25KB)
+        ├── aula4.ts (mockSlidesAula4 - ~30KB)
+        └── aula5.ts (mockSlidesAula5 - ~55KB)
+```
+
+**Processo de Refatoração:**
+1. ✅ Criação da estrutura de diretórios `mocks/` e `mocks/slides/`
+2. ✅ Extração de dados das aulas 1-5 usando script Node.js automatizado
+3. ✅ Separação de entidades em arquivos especializados (users, quiz, lessons, etc.)
+4. ✅ Criação do barrel export (`mocks/index.ts`) para centralizar exports
+5. ✅ Limpeza do `mockData.ts` mantendo apenas re-exports para compatibilidade
+6. ✅ Validação do build (`npm run build`) sem erros
+7. ✅ Remoção de scripts temporários
+
+**Vantagens da Refatoração:**
+- 📦 **Modularidade:** Cada arquivo com responsabilidade clara e única
+- 🔍 **Manutenibilidade:** Fácil localização e edição de dados específicos
+- ⚡ **Performance:** Editor carrega apenas arquivos necessários
+- 🔄 **Escalabilidade:** Adição de novas aulas sem impactar arquivo monolítico
+- 🤝 **Colaboração:** Redução de conflitos em trabalho paralelo
+- ✅ **Compatibilidade:** Nenhuma quebra de imports existentes (`export * from "./mocks"`)
+
+**Arquivos Modificados:**
+- `src/lib/mockData.ts` (4200+ linhas → 23 linhas)
+- `src/lib/mocks/index.ts` (novo)
+- `src/lib/mocks/*.ts` (11 novos arquivos)
+- `src/lib/mocks/slides/*.ts` (5 novos arquivos)
+
+**Testes de Validação:**
+- ✅ Build TypeScript sem erros
+- ✅ Build Vite completado com sucesso
+- ✅ Nenhum import quebrado detectado
+- ✅ Arquivos gerados com encoding UTF-8 correto
+
+**Padrão Estabelecido:**
+Para futuras aulas (06-10), seguir a estrutura:
+1. Criar `src/lib/mocks/slides/aulaX.ts` com `mockSlidesAulaX`
+2. Adicionar export no `src/lib/mocks/index.ts`
+3. Adicionar ao array `mockSlideDecks` em `slideDecks.ts`
+4. Validar build e navegação
+
 ### Validação dos Slides 11–18 da Aula 01
 
 - ✅ Implementação dos slides 11–18 da Aula 01 confirmada como aplicada no deck `deck-aula1` configurado em [`src.lib.mockData.ts`](src/lib/mockData.ts:3161).
@@ -54,14 +125,35 @@ Observação: A seção "3.1. Implementação da Aula 01" foi atualizada para re
 - ESLint: recommended + react + react-hooks + jsx-a11y.
 - Regras rígidas: sem hooks fora de componentes, keys estáveis, acessibilidade (alt/aria-*), links externos com `rel="noopener noreferrer"`, zero imports/variáveis não usados e `overflow-y-auto` nas páginas principais.
 
-## Estrutura Padrão
+## Estrutura Padrão (Atualizada 2025-11-12)
 ```
 src/
 ├── components/
 │   ├── ui/            # Base (Button, Card, Avatar, HelpModal, Modal, etc.)
 │   ├── features/      # Features (Dashboard, Aulas, Ranking, Comunidade, Quiz*, Slide*)
 │   └── layout/        # Header, Sidebar, Layout shell
-├── lib/               # theme.ts, mockData.ts, utils.ts, constants.ts
+├── lib/
+│   ├── mockData.ts    # Shim de compatibilidade (re-exports de ./mocks)
+│   ├── mocks/         # [REFATORADO] Dados mock modularizados
+│   │   ├── index.ts           # Barrel export
+│   │   ├── users.ts           # Mock de usuários
+│   │   ├── quiz.ts            # Mock de quiz
+│   │   ├── lessons.ts         # Mock de aulas
+│   │   ├── lessonScores.ts    # Mock de scores
+│   │   ├── ranking.ts         # Mock de ranking
+│   │   ├── presence.ts        # Mock de presença
+│   │   ├── forum.ts           # Mock de fórum
+│   │   ├── gallery.ts         # Mock de galeria
+│   │   ├── slideDecks.ts      # Mock de decks de slides
+│   │   └── slides/            # Slides por aula
+│   │       ├── aula1.ts (68KB)
+│   │       ├── aula2.ts (~45KB)
+│   │       ├── aula3.ts (~25KB)
+│   │       ├── aula4.ts (~30KB)
+│   │       └── aula5.ts (~55KB)
+│   ├── theme.ts       # Gerenciamento de temas
+│   ├── utils.ts       # Utilitários
+│   └── constants.ts   # Constantes
 ├── pages/             # Rotas (DashboardPage, AulasPage, AulaSlidePage, QuizPage, QuizQuestionPage, etc.)
 ├── styles/            # globals.css
 ├── types/             # Tipagens compartilhadas

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import SlideViewer from "@/components/features/SlideViewer";
 import { Layout } from "@/components/layout/Layout";
 import type { SlideDeck } from "@/types";
-import { mockSlideDecks } from "@/lib/mockData";
+import { loadSlideDeck } from "@/lib/slideDeckLoader";
 
 export function AulaSlidePage() {
   const { id } = useParams<{ id: string }>();
@@ -20,14 +20,14 @@ export function AulaSlidePage() {
     }
 
     // Simular carregamento dos dados
-    const loadSlideDeck = async () => {
+    const fetchSlideDeck = async () => {
       try {
         setLoading(true);
         
         // Simular delay de rede
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        const deck = mockSlideDecks.find(d => d.lessonId === id);
+        const deck = await loadSlideDeck(id);
         if (!deck) {
           setError(`Aula "${id}" não encontrada`);
           return;
@@ -43,7 +43,7 @@ export function AulaSlidePage() {
       }
     };
 
-    loadSlideDeck();
+    fetchSlideDeck();
   }, [id]);
 
   const handleSlideChange = (slideIndex: number) => {

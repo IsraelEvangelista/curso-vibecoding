@@ -231,29 +231,33 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 Ir para aula
               </button>
 
-              <button
-                onClick={() => onNavigate("quiz")}
-                className={cn(
-                  "btn-outline",
-                  "flex items-center justify-center gap-2 px-4 py-3 rounded-xl",
-                  "text-sm font-semibold transition-all duration-200"
-                )}
-              >
-                <CheckCircle className="h-4 w-4" />
-                Quiz
-              </button>
+              {false && (
+                <button
+                  onClick={() => onNavigate("quiz")}
+                  className={cn(
+                    "btn-outline",
+                    "flex items-center justify-center gap-2 px-4 py-3 rounded-xl",
+                    "text-sm font-semibold transition-all duration-200"
+                  )}
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  Quiz
+                </button>
+              )}
 
-              <button
-                onClick={() => onNavigate("challenge")}
-                className={cn(
-                  "btn-outline",
-                  "flex items-center justify-center gap-2 px-4 py-3 rounded-xl",
-                  "text-sm font-semibold transition-all duration-200"
-                )}
-              >
-                <Award className="h-4 w-4" />
-                Desafio
-              </button>
+              {false && (
+                <button
+                  onClick={() => onNavigate("challenge")}
+                  className={cn(
+                    "btn-outline",
+                    "flex items-center justify-center gap-2 px-4 py-3 rounded-xl",
+                    "text-sm font-semibold transition-all duration-200"
+                  )}
+                >
+                  <Award className="h-4 w-4" />
+                  Desafio
+                </button>
+              )}
             </div>
           </div>
         </div>
