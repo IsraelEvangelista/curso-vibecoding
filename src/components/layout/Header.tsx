@@ -1,22 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
-import {
-  Sun,
-  Moon,
-  Menu,
-  X,
-  LogOut,
-  BookOpen,
-  Trophy,
-  Users,
-  Settings,
-  ChevronDown,
-  LayoutDashboard,
-} from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Sun, Moon, Menu, X, LogOut, BookOpen, Users, Settings, ChevronDown } from "lucide-react";
 
 import { Avatar } from "@/components/ui";
-import { mockCurrentUser } from "@/lib/mockData";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import { Theme, applyTheme } from "@/lib/theme";
 import { ThemeHero } from "@/components/features/ThemeHero";
 
@@ -41,9 +30,11 @@ export function Header() {
     right: 16,
   });
   const [hasMounted, setHasMounted] = useState(false);
+  const { profile, user } = useAuth();
 
   const themeButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setHasMounted(true);
@@ -70,12 +61,14 @@ export function Header() {
     // Não recarrega mais - o tema é aplicado dinamicamente
   };
 
+  const path = location.pathname
+  const parts = path.split("/").filter(Boolean)
+  const currentCourseId = parts[0] === "curso" ? parts[1] : undefined
   const navigationItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
-    { icon: BookOpen, label: "Aulas", href: "/aulas" },
-    { icon: Trophy, label: "Ranking", href: "/ranking" },
     { icon: Users, label: "Comunidade", href: "/comunidade" },
-  ];
+    { icon: BookOpen, label: currentCourseId ? "Curso" : "Cursos", href: "/cursos" },
+    ...(currentCourseId ? [{ icon: BookOpen, label: "Aulas", href: `/curso/${currentCourseId}` }] : []),
+  ]
 
   const themeMenu =
     hasMounted && isThemeMenuOpen
@@ -201,15 +194,15 @@ export function Header() {
                 <div className="flex items-center space-x-3">
                   <div className="hidden sm:block text-right">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {mockCurrentUser.name}
+                      {user?.name ?? profile?.full_name ?? "Usuário"}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                      {mockCurrentUser.role}
+                      {profile?.role === "admin" ? "Admin" : "Aluno"}
                     </div>
                   </div>
                   <Avatar
-                    src={mockCurrentUser.avatar}
-                    alt={mockCurrentUser.name}
+                    src={undefined as unknown as string}
+                    alt={"Avatar"}
                     className="h-8 w-8"
                   />
                 </div>
@@ -224,6 +217,13 @@ export function Header() {
                 ) : (
                   <Menu className="h-6 w-6" />
                 )}
+              </button>
+              <button
+                onClick={async () => { await supabase.auth.signOut(); navigate("/") }}
+                className="hidden md:flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+                title="Sair"
+              >
+                <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -279,7 +279,7 @@ export function Header() {
                       </div>
                     </div>
                     
-                    <button className="flex items-center space-x-3 w-full text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 p-2 rounded-md">
+                    <button className="flex items-center space-x-3 w-full text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 p-2 rounded-md" onClick={async () => { await supabase.auth.signOut() }}>
                       <LogOut className="h-5 w-5" />
                       <span>Sair</span>
                     </button>

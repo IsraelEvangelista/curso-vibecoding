@@ -205,8 +205,9 @@ export function SlideViewer({
 
   const handleExit = useCallback(() => {
     onExit();
-    navigate('/aulas');
-  }, [onExit, navigate]);
+    // Removido navigate('/aulas') pois onExit já gerencia a navegação
+    // e a rota /aulas não existe, causando erro 404
+  }, [onExit]);
 
   const handleNavigateToQuiz = useCallback(() => {
     onNavigateToQuiz();
@@ -308,7 +309,12 @@ export function SlideViewer({
           return content;
         };
         const escapeHtml = (str: string) =>
-          str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+          str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
 
         let text = stripLeadingTitle(slideContentText, currentSlide.title);
         const codeBlocks: { lang: string; code: string }[] = [];

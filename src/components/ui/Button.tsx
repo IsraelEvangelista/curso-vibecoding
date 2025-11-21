@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "primary" | "secondary" | "outline";
+  variant?: "default" | "primary" | "secondary" | "outline" | "neon";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
 }
@@ -31,7 +31,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         "bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700",
       outline:
-        "border border-gray-300 bg-white shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700",
+        "btn-outline",
+      neon: "btn-neon",
     };
 
     const sizes = {

@@ -24,6 +24,62 @@
 
 ## Registro de Atividades Recentes
 
+### Integração Supabase + Correções de Segurança e UI (2025-11-20)
+
+Resumo do que foi implementado e validado:
+
+- Autenticação e ambiente
+  - `.env`, `.env.example` e `.env.exemple` atualizados com `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_PUBLISHABLE_KEY`
+  - `.gitignore` e `.ignore` garantem que secrets e docs não funcionais não sejam commitados
+- Fix do erro de cadastro “AuthApiError: Database error saving new user”
+  - Função `public.handle_new_user()` definida com `SECURITY DEFINER` e `SET search_path = public, pg_temp`
+  - Migração: `supabase/migrations/2025112008_fix_handle_new_user_security.sql`
+- Migração de `profiles.role` para enum `'admin'|'aluno'`
+  - Criação do tipo `public.user_role`
+  - Conversão segura da coluna (drop default textual, `USING CASE`, default tipado)
+  - Remoção e recriação das policies que referenciam `profiles.role` em `profiles`, `courses`, `lessons`, `course_enrollments`, `access_requests`
+  - Migração: `supabase/migrations/2025112009_role_enum.sql`
+- Correção de recursão infinita em policies de `profiles` (erro 42P17)
+  - Função `public.is_admin()` com `SECURITY DEFINER`
+  - Policies de `profiles` passam a usar `USING (public.is_admin())`
+  - Migração: `supabase/migrations/2025112010_fix_profiles_policies.sql`
+- Perfil com nome completo
+  - `handle_new_user` insere `profiles.full_name` usando `COALESCE(display_name, full_name, name)` de `raw_user_meta_data`
+  - Migração: `supabase/migrations/2025112011_handle_new_user_full_name.sql`
+  - `signUp` envia `display_name`, `full_name` e `name` no `options.data`
+  - `AuthContext` lê `display_name > full_name > name`; Header exibe o nome com fallback para `profile.full_name`
+- Navegação e páginas
+  - Pós-login: redireciona para `/cursos`
+  - Header: navegação principal com “Comunidade”, “Cursos” e “Aulas” (condicional quando há curso selecionado)
+  - Nova página `Cursos` (`/cursos`): cards com `title`, `description`, badge “Ativo/Inativo” e botão “Acessar” → `/curso/:id`
+  - Página `Aulas` (`/curso/:id`): aulas carregadas de `public.lessons` por `course_id`, ordenadas por `lesson_number`
+  - Cards de aula: badge “Ativa/Bloqueada” conforme `lessons.is_active`; admin vê botões “Ativar”/“Bloquear” com toasts amigáveis; alunos não entram em aulas bloqueadas
+  - Botão “Ver vídeo” em cada card: abre `lessons.video_url` (desabilitado se ausente)
+- Cadastro e login
+  - Validação de senha forte: mínimo 8 caracteres, ao menos 1 letra, 1 número e 1 caractere especial
+  - Botões de mostrar/ocultar senha nos campos de login e cadastro
+  - Toast de confirmação no canto inferior direito em vez de `alert`
+- Remoções
+  - Telas/rotas de debug removidas; debug deve ser feito via MCP Chrome DevTools
+- Validação
+  - `npm run lint` e `npm run build` passando
+  - Preview sem erros
+
+Arquivos principais tocados:
+- Frontend: `src/components/layout/Header.tsx`, `src/components/layout/Sidebar.tsx`, `src/pages/LoginPage.tsx`, `src/pages/CoursesPage.tsx`, `src/pages/AulasPage.tsx`, `src/components/features/Aulas.tsx`, `src/components/features/Aulas/LessonCard.tsx`, `src/context/AuthContext.tsx`, `src/types/index.ts`, `src/App.tsx`
+- Migrations: `2025112008_fix_handle_new_user_security.sql`, `2025112009_role_enum.sql`, `2025112010_fix_profiles_policies.sql`, `2025112011_handle_new_user_full_name.sql`
+
+Padrões e lições aprendidas:
+- Triggers que inserem em tabelas com RLS devem usar `SECURITY DEFINER` e `search_path` seguro
+- Alteração de tipo em colunas usadas em policies exige `DROP POLICY` → `ALTER COLUMN TYPE` → recriar policies
+- Para evitar recursão em policies, encapsular a checagem de admin em função `SECURITY DEFINER`
+- Sempre propagar nomes em `user_metadata` no `signUp` e consumi-los em contexto
+
+Próximos passos sugeridos:
+- Mover mais fluxos (comunidade, ranking, presença) para dados reais no Supabase com RLS
+- Adicionar testes E2E para navegação Cursos → Aulas e controle de ativação
+- Implementar upload/visualização de vídeos com storage do Supabase
+
 ### Refatoração de mockData.ts em Módulos Menores (2025-11-12)
 
 **Problema Identificado:**

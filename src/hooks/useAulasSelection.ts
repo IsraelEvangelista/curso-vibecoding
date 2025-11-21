@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { Lesson } from '@/types'
 
 export function useAulasSelection() {
@@ -7,6 +7,7 @@ export function useAulasSelection() {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const navigate = useNavigate()
+  const { id: courseId } = useParams<{ id: string }>()
 
   const toggleExpand = useCallback((lessonId: string) => {
     setExpandedId(prev => (prev === lessonId ? null : lessonId))
@@ -28,16 +29,16 @@ export function useAulasSelection() {
     closeModal()
     switch (section) {
       case 'content':
-        navigate(`/aula/${id}`)
+        navigate(`/aula/${id}?course=${courseId}`)
         break
       case 'quiz':
-        navigate(`/aula/${id}/quiz`)
+        navigate(`/aula/${id}/quiz?course=${courseId}`)
         break
       case 'challenge':
-        navigate(`/aula/${id}/desafio`)
+        navigate(`/aula/${id}/desafio?course=${courseId}`)
         break
     }
-  }, [selectedLesson, closeModal, navigate])
+  }, [selectedLesson, closeModal, navigate, courseId])
 
   return { expandedId, modalOpen, selectedLesson, toggleExpand, openModal, closeModal, navigateTo }
 }

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Home, BookOpen, Trophy, Users, Settings, BarChart3 } from 'lucide-react';
+import { BookOpen, Users, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -8,15 +9,13 @@ interface SidebarProps {
 }
 
 const navigationItems = [
-  { icon: Home, label: 'Dashboard', href: '/' },
   { icon: BookOpen, label: 'Aulas', href: '/aulas' },
-  { icon: Trophy, label: 'Ranking', href: '/ranking' },
   { icon: Users, label: 'Comunidade', href: '/comunidade' },
-  { icon: BarChart3, label: 'Progresso', href: '/progresso' },
   { icon: Settings, label: 'Configurações', href: '/configuracoes' },
 ];
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+  const { profile } = useAuth();
   return (
     <>
       {/* Mobile backdrop */}
@@ -75,10 +74,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <div className="flex items-center space-x-3">
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-900 dark:text-white">
-                  Ana Silva
+                  {profile?.full_name ?? 'Usuário'}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  1.250 pontos
+                <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                  {profile?.role === 'admin' ? 'Admin' : 'Aluno'}
                 </div>
               </div>
             </div>

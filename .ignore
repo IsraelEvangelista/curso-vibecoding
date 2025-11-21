@@ -1,0 +1,13 @@
+# Arquivos e pastas não essenciais ao funcionamento
+.env
+.env.local
+.env.*.local
+.env.example
+.env.exemple
+.trae/
+Docs/
+Contexto/
+*.md
+node_modules/
+dist/
+*.log

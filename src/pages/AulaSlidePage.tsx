@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import SlideViewer from "@/components/features/SlideViewer";
 import { Layout } from "@/components/layout/Layout";
@@ -8,6 +8,8 @@ import { loadSlideDeck } from "@/lib/slideDeckLoader";
 export function AulaSlidePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const courseId = searchParams.get('course');
   const [slideDeck, setSlideDeck] = useState<SlideDeck | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,17 @@ export function AulaSlidePage() {
   };
 
   const handleExit = () => {
-    navigate('/aulas');
+    // Validação robusta do ID do curso
+    const cleanCourseId = courseId?.trim();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    
+    if (cleanCourseId && uuidRegex.test(cleanCourseId)) {
+      // Usando window.location.href para garantir que a navegação ocorra corretamente
+      // e limpar qualquer estado de rota inválido
+      window.location.href = `/curso/${cleanCourseId}`;
+    } else {
+      navigate('/cursos');
+    }
   };
 
   const handleNavigateToQuiz = () => {

@@ -1,4 +1,14 @@
 import type { SlideDeck, Slide } from '@/types'
+import { supabase } from '@/lib/supabase'
+
+// Mapeamento de UUIDs do Supabase para IDs simples dos mocks
+const uuidToLessonIdMap: Record<string, string> = {
+  '060571db-71d9-4278-876c-af9d3a4b369a': 'aula1',
+  '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p': 'aula2',
+  '2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q': 'aula3',
+  '3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r': 'aula4',
+  '4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s': 'aula5'
+}
 
 const titles: Record<string, string> = {
   aula1: 'Aula 01: Fundamentos do Vibe Coding & Riscos',
@@ -9,10 +19,24 @@ const titles: Record<string, string> = {
 }
 
 export async function loadSlideDeck(lessonId: string): Promise<SlideDeck | null> {
-  const title = titles[lessonId]
+  let normalizedLessonId = uuidToLessonIdMap[lessonId] || lessonId
+
+  if (!titles[normalizedLessonId]) {
+    const { data } = await supabase
+      .from('lessons')
+      .select('lesson_number')
+      .eq('id', lessonId)
+      .maybeSingle()
+    const num = (data?.lesson_number ?? null) as number | null
+    if (!num) return null
+    normalizedLessonId = `aula${num}`
+  }
+
+  const title = titles[normalizedLessonId]
   if (!title) return null
+  
   let slides: Slide[]
-  switch (lessonId) {
+  switch (normalizedLessonId) {
     case 'aula1': {
       const mod = await import('@/lib/mocks/slides/aula1')
       slides = mod.mockSlidesAula1
@@ -42,8 +66,8 @@ export async function loadSlideDeck(lessonId: string): Promise<SlideDeck | null>
       return null
   }
   return {
-    id: `deck-${lessonId}`,
-    lessonId,
+    id: `deck-${normalizedLessonId}`,
+    lessonId: normalizedLessonId,
     title,
     slides,
     currentSlideIndex: 0

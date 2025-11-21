@@ -7,6 +7,7 @@
 .env.local
 .env.*.local
 .env.example
+.env.exemple
 
 # IDEs and editors
 .vscode/
@@ -14,14 +15,19 @@
 .claude/
 
 # Project management
-.trae/
+# Track governance file
+!.trae/AGENTS.md
 
-# Documentation
+# Documentation (non-essential)
 /Contexto/*.md
 /Contexto/**/*.md
 !/Contexto/**/assets/
 !/Contexto/**/imagens/
 /Docs/
+
+# Supabase migrations (managed outside repo)
+/supabase/migrations/
+/supabase/debug_*.sql
 
 # Logs
 npm-debug.log*

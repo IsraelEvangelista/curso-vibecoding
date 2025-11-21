@@ -18,6 +18,8 @@ export interface Lesson {
   description: string;
   order: number;
   isLocked: boolean;
+  isActive?: boolean;
+  videoUrl?: string;
   progress?: number;
   duration: string;
   content: {
@@ -147,6 +149,36 @@ export interface Comment {
   likes: number;
 }
 
+// Tipos para Comunidade (Discord-like)
+export interface Channel {
+  id: string;
+  name: string;
+  type: 'text' | 'voice';
+  categoryId: string;
+  unreadCount?: number;
+}
+
+export interface ChannelCategory {
+  id: string;
+  name: string;
+  channels: Channel[];
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  authorId: string;
+  channelId: string;
+  createdAt: string;
+  attachments?: string[];
+  reactions?: Record<string, number>;
+  replyToId?: string;
+}
+
+export interface CommunityUser extends User {
+  status: 'online' | 'idle' | 'dnd' | 'offline';
+  customStatus?: string;
+}
 // Sistema de Temas
 export type Theme = "light" | "dark" | "matrix" | "cyberpunk";
 
