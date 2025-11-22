@@ -26,7 +26,6 @@
 /Docs/
 
 # Supabase migrations (managed outside repo)
-/supabase/migrations/
 /supabase/debug_*.sql
 /supabase/**/*.md
 

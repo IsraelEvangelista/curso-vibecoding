@@ -11,12 +11,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8081,
+    port: 8080,
     strictPort: true,
     host: true
   },
   preview: {
-    port: 8081,
+    port: 8080,
     strictPort: true,
     host: true
   },
@@ -37,7 +37,11 @@ export default defineConfig({
             './src/components/features/Dashboard.tsx',
             './src/components/features/Aulas.tsx',
             './src/components/features/Ranking.tsx',
-            './src/components/features/Comunidade.tsx'
+            './src/components/features/Comunidade/index.tsx'
+          ],'community-components': [
+            './src/components/features/Comunidade/Sidebar.tsx',
+            './src/components/features/Comunidade/ChatArea.tsx',
+            './src/components/features/Comunidade/MembersSidebar.tsx'
           ],
           'quiz-system': [
             './src/components/features/QuizHeader.tsx',

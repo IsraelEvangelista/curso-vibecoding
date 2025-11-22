@@ -29,7 +29,7 @@ export function CoursesPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((c) => {
-              const isVibeCoding = c.title === "Vibe Coding";
+              const isVibeCoding = c.slug === 'vibe-coding' || c.title.toLowerCase().includes("vibe coding");
               return (
                 <Card 
                   key={c.id} 

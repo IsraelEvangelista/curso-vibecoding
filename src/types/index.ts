@@ -156,12 +156,21 @@ export interface Channel {
   type: 'text' | 'voice';
   categoryId: string;
   unreadCount?: number;
+  displayName?: string;
 }
 
 export interface ChannelCategory {
   id: string;
   name: string;
+  order?: number;
   channels: Channel[];
+}
+
+export interface MessageAttachment {
+  id?: string;
+  type: 'image' | 'video' | 'file' | 'audio';
+  url: string;
+  name: string;
 }
 
 export interface Message {
@@ -170,9 +179,9 @@ export interface Message {
   authorId: string;
   channelId: string;
   createdAt: string;
-  attachments?: string[];
+  attachments?: MessageAttachment[];
   reactions?: Record<string, number>;
-  replyToId?: string;
+  replyToId?: string | null;
 }
 
 export interface CommunityUser extends User {

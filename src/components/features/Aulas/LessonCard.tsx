@@ -21,7 +21,7 @@ export const LessonCard: FC<Props> = ({ lesson, expanded, onToggleExpand, onOpen
   const [toastMsg, setToastMsg] = useState<string | null>(null)
   const [toastType, setToastType] = useState<'success' | 'error'>('success')
   return (
-    <Card className="p-6 bg-white dark:bg-[#0a0a0a] rounded-xl">
+    <Card className="p-6 bg-white dark:bg-[#0a0a0a] rounded-xl relative overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-start gap-3 mb-3">
@@ -55,7 +55,7 @@ export const LessonCard: FC<Props> = ({ lesson, expanded, onToggleExpand, onOpen
             <Button className="btn-neon" onClick={onOpen} disabled={lockedForStudent}>
               {lockedForStudent ? (
                 <span className="flex items-center gap-1">
-                  <ChevronDown className="h-4 w-4" /> Aula bloqueada
+                  <ChevronDown className="h-4 w-4" /> Aula indisponível
                 </span>
               ) : (
                 'Entrar na Aula'
@@ -160,6 +160,11 @@ export const LessonCard: FC<Props> = ({ lesson, expanded, onToggleExpand, onOpen
             <span className="inline-block w-2 h-2 rounded-full bg-white/70" />
             <span>{toastMsg}</span>
           </div>
+        </div>
+      )}
+      {lockedForStudent && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] pointer-events-none flex items-center justify-center">
+          <div className="px-3 py-1.5 rounded bg-black/60 text-white text-xs font-semibold">Aula indisponível</div>
         </div>
       )}
     </Card>

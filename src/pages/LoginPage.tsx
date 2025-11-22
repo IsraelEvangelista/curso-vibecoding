@@ -38,12 +38,17 @@ export function LoginPage() {
 
   const handleLogin = async () => {
     if (!emailValid(loginEmail) || !passwordStrong(loginPassword)) {
-      setLoginError("Verifique e-mail e senha (mínimo 8 caracteres)");
+      setLoginError("Verifique e-mail e senha — mínimo de 8 caracteres, com pelo menos 1 letra, 1 número e 1 caractere especial");
       return;
     }
     const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
     if (error) {
-      setLoginError("Falha ao entrar. Verifique as credenciais.");
+      const m = (error.message || '').toLowerCase();
+      if (m.includes('confirm') || m.includes('not confirmed')) {
+        setLoginError("Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada e finalize a confirmação para acessar.");
+      } else {
+        setLoginError("Falha ao entrar. Verifique e-mail e senha ou redefina sua senha.");
+      }
       return;
     }
     const { data: userData } = await supabase.auth.getUser();
@@ -60,7 +65,7 @@ export function LoginPage() {
       .maybeSingle();
     if (!prof?.is_active) {
       await supabase.auth.signOut();
-      setLoginError(null);
+      setLoginError("Seu acesso ainda não foi liberado pelo admin. Solicite liberação pelo botão na tela de login.");
       setApprovalOpen(true);
       return;
     }
@@ -78,7 +83,7 @@ export function LoginPage() {
       return;
     }
     if (!passwordStrong(signupPassword)) {
-      setSignupError("Senha deve ter ao menos 8 caracteres");
+      setSignupError("A senha deve ter mínimo de 8 caracteres, com pelo menos 1 letra, 1 número e 1 caractere especial");
       return;
     }
     if (signupPassword !== signupConfirm) {
@@ -217,7 +222,8 @@ export function LoginPage() {
                       type={showLoginPassword ? "text" : "password"} 
                       placeholder="••••••••"
                       value={loginPassword} 
-                      onChange={(e) => setLoginPassword(e.target.value)} 
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                       className="h-11 pr-10"
                     />
                     <button
