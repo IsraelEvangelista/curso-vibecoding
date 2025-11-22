@@ -15,7 +15,7 @@
 .claude/
 
 # Project management
-# Track governance file
+.trae/**
 !.trae/AGENTS.md
 
 # Documentation (non-essential)
@@ -28,6 +28,7 @@
 # Supabase migrations (managed outside repo)
 /supabase/migrations/
 /supabase/debug_*.sql
+/supabase/**/*.md
 
 # Logs
 npm-debug.log*

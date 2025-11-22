@@ -5,6 +5,9 @@ export function applyTheme(theme: Theme): void {
     const root = document.documentElement;
     const body = document.body;
 
+    // Add transition class
+    root.classList.add("theme-transition");
+
     // Remove all theme classes
     root.classList.remove("dark", "light");
     body.classList.remove("dark", "light");
@@ -14,6 +17,11 @@ export function applyTheme(theme: Theme): void {
     body.classList.add(theme);
 
     localStorage.setItem("theme", theme);
+
+    // Remove transition class after animation
+    setTimeout(() => {
+      root.classList.remove("theme-transition");
+    }, 500);
   }
 }
 

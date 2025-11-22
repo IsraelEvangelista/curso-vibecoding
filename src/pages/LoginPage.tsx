@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Eye, EyeOff } from "lucide-react";
 import { ForgotPasswordModal } from "@/components/ui/ForgotPasswordModal";
+import { AccessRequestModal } from "@/components/ui/AccessRequestModal";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
+
+import dashmakerLogo from "@/assets/dashmaker_logo.png";
 
 export function LoginPage() {
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -25,8 +27,11 @@ export function LoginPage() {
   const [signupError, setSignupError] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestEmail, setRequestEmail] = useState("");
   const navigate = useNavigate();
-  const { profile } = useAuth();
+
 
   const emailValid = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const passwordStrong = (v: string) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(v);
@@ -39,6 +44,24 @@ export function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password: loginPassword });
     if (error) {
       setLoginError("Falha ao entrar. Verifique as credenciais.");
+      return;
+    }
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id ?? null;
+    if (!uid) {
+      setLoginError("Falha ao obter usuário.");
+      await supabase.auth.signOut();
+      return;
+    }
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('user_id,is_active')
+      .eq('user_id', uid)
+      .maybeSingle();
+    if (!prof?.is_active) {
+      await supabase.auth.signOut();
+      setLoginError(null);
+      setApprovalOpen(true);
       return;
     }
     setLoginError(null);
@@ -63,7 +86,6 @@ export function LoginPage() {
       return;
     }
     
-    console.log("Iniciando cadastro...", { email: signupEmail, name: signupName });
     
     const { data, error } = await supabase.auth.signUp({ 
       email: signupEmail, 
@@ -73,10 +95,9 @@ export function LoginPage() {
       } 
     });
     
-    console.log("Resultado do cadastro:", { data, error });
     
     if (error) {
-      console.error("Erro no cadastro:", error);
+      // erro tratado abaixo
       
       // Capturar mensagens específicas do Supabase
       let errorMessage = "Erro ao cadastrar: ";
@@ -123,8 +144,11 @@ export function LoginPage() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <img src={dashmakerLogo} alt="DashMaker Logo" className="h-20 w-auto object-contain" />
+          </div>
           <h1 className="text-4xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-green-400 dark:to-primary-500 mb-2">
-            Vibe Coding
+            DashMaker
           </h1>
           <p className="text-text-secondary">Sua jornada no desenvolvimento começa aqui</p>
         </div>
@@ -220,16 +244,10 @@ export function LoginPage() {
                 >
                   Entrar na Plataforma
                 </Button>
-                {!profile?.is_active && (
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-xs text-text-secondary">Sua conta ainda não foi liberada pelo admin.</div>
-                    <Button variant="outline" onClick={async () => {
-                      await supabase.from('access_requests').insert({ message: 'Solicitação de liberação' });
-                      try { await supabase.functions.invoke('notify-admin-access', { body: { message: 'Solicitação de liberação' } }) } catch (e) { console.warn('Falha ao notificar admin', e) }
-                      alert('Solicitação registrada. Aguarde liberação.');
-                    }}>Solicitar liberação</Button>
-                  </div>
-                )}
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-xs text-text-secondary">Precisa de acesso? Solicite liberação ao admin.</div>
+                  <Button variant="outline" onClick={() => { setRequestEmail(loginEmail); setRequestOpen(true); }}>Solicitar liberação</Button>
+                </div>
               </div>
             )}
 
@@ -331,6 +349,26 @@ export function LoginPage() {
         onSubmit={async (email) => { await supabase.auth.resetPasswordForEmail(email) }}
       />
 
+      {approvalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={() => setApprovalOpen(false)}>
+          <div className="bg-white dark:bg-[#0a0a0a] rounded-xl shadow-xl w-[520px] max-w-[90%] p-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Cadastro em aprovação</h3>
+              <button onClick={() => setApprovalOpen(false)}><EyeOff className="h-5 w-5 text-gray-500" /></button>
+            </div>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">Seu cadastro está em processo de aprovação. Você pode requisitar liberação através do botão abaixo.</p>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" onClick={() => setApprovalOpen(false)}>Fechar</Button>
+                <Button variant="neon" onClick={() => {
+                  setApprovalOpen(false);
+                  setRequestEmail(loginEmail);
+                  setRequestOpen(true);
+                }}>Solicitar liberação</Button>
+              </div>
+          </div>
+        </div>
+      )}
+
       {toastMsg && (
         <div className="fixed bottom-4 right-4 z-50">
           <div className={cn(
@@ -342,6 +380,20 @@ export function LoginPage() {
           </div>
         </div>
       )}
+
+      <AccessRequestModal
+        isOpen={requestOpen}
+        defaultEmail={requestEmail}
+        onClose={() => setRequestOpen(false)}
+        onSubmit={async (email) => {
+          try { await supabase.from('access_requests').insert({ email, message: 'Solicitação de liberação' }); } catch { return; }
+          try { await supabase.functions.invoke('notify-admin-access', { body: { targetEmail: email } }); } catch (_e) { /* no-op */ }
+          setToastType('success');
+          setToastMsg('Solicitação enviada aos administradores. Aguarde liberação.');
+          setTimeout(() => setToastMsg(null), 5000);
+          setRequestOpen(false);
+        }}
+      />
     </div>
   );
 }

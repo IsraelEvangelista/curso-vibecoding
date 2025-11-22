@@ -10,8 +10,28 @@
    - Edição (autor/admin), exclusão (admin) e resposta (`reply_to_id`).
    - Sidebar com segmentos e canais reais (`community_categories`, `community_channels`).
    - CRUD de segmentos/canais (admin) com cascata (schema `ON DELETE CASCADE`).
-   - Presença: `profiles.last_seen_at` atualizado via RPC `touch_last_seen`.
-   - Badge ADMIN substitui rótulo BOT.
+- Presença: `profiles.last_seen_at` atualizado via RPC `touch_last_seen`.
+- Badge ADMIN substitui rótulo BOT.
+
+### Comunidade — melhorias (2025-11)
+- Realtime de mensagens com de-duplicação (evita `key` duplicada).
+- Anexos por botão `+`: upload para bucket `community` e vínculo em `message_attachments`.
+- Emojis: picker suspenso acima do ícone com ampla variedade.
+- GIF: ícone removido.
+- Menções: `@` isolado lista todos os usuários; com texto, filtra por nome.
+- Ações por mensagem: Responder (sempre), Editar (autor), Apagar (autor/admin).
+- Notificações: dropdown no ícone (DMs e menções; clique navega ao canal).
+- DMs: agrupadas em segmento virtual “Mensagens Privadas” (último grupo) e exibição de nome do usuário (não o id).
+- Texto em DM: “Diga olá para #{usuário}”.
+
+### Infra de Dev
+- Dev server na porta `8081` (estável quando tarefas usam `8080`).
+- Favicon: `/src/assets/dashmaker_logo.png`.
+
+## Pendência de Teste (renderização em tempo real)
+- Validação obrigatória: confirmar se a renderização dinâmica (Supabase Realtime em `Comunidade`) atualiza mensagens e notificações sem refresh.
+- Procedimento: abrir duas sessões (ou navegadores), enviar mensagem em um canal e verificar atualização imediata na outra sessão; conferir badges e sino.
+- Lembrete automático: ao iniciar uma nova sessão e ler este arquivo, o agente deve lembrar o dev desta pendência e perguntar se o teste já foi feito.
 
 2. Contagens e Notificações (otimização):
    - RPC `get_unread_counts(uid)` retorna não lidas por `channel_id`.
@@ -36,6 +56,10 @@
   - Leitura: efeito `updateRead`
   - CRUD: `createCategory`, `renameCategory`, `deleteCategory`, `createChannel`, `renameChannel`, `deleteChannel`
   - RPCs: efeito `computeUnreadRpc`
+  - Realtime: assinatura `messages:${dbChannelId}` com handlers `INSERT/UPDATE/DELETE`
+  - Notificações: `notificationItems` dropdown acionado pelo Bell
+  - Menções: `mentionCandidates` e sobreposição de sugestões
+  - DMs: `dmNames` e `getChannelLabel`
 - AuthContext → `src/context/AuthContext.tsx`
 
 ## Docs e Arquivos Relacionados

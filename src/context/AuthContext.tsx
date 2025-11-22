@@ -46,17 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) { setProfile(null); return }
-    console.log("Buscando profile para usuário:", user.id);
     supabase
       .from('profiles')
       .select('user_id, role, is_active, full_name, avatar_url')
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data, error }) => {
-        console.log("Resultado da busca de profile:", { data, error });
-        if (error) {
-          console.error("Erro ao buscar profile:", error);
-        }
+        void error;
         setProfile(data as Profile | null)
       })
     supabase.rpc('touch_last_seen').then(() => {})

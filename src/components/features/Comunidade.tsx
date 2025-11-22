@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { Hash, Search, Bell, Users, Settings, Plus, Smile, HelpCircle, Menu, X, Edit, Trash, Reply } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Hash, Search, Bell, Users, Settings, Plus, Smile, HelpCircle, Menu, X, Edit, Trash, Reply, MessageSquare } from 'lucide-react';
 import { Avatar, Button, Badge } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +27,7 @@ export function Comunidade() {
   void page;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const realtimeRef = useRef<RealtimeChannel | null>(null);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
@@ -33,6 +35,13 @@ export function Comunidade() {
   const [notifCount, setNotifCount] = useState<number>(0);
   const [showDmModal, setShowDmModal] = useState<boolean>(false);
   const [dmSearch, setDmSearch] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const [mentionOpen, setMentionOpen] = useState<boolean>(false);
+  const [mentionCandidates, setMentionCandidates] = useState<Array<{ id: string; name: string }>>([]);
+  const [dmNames, setDmNames] = useState<Record<string, string>>({});
+  const [showNotifDropdown, setShowNotifDropdown] = useState<boolean>(false);
+  const [notificationItems, setNotificationItems] = useState<Array<{ type: 'dm' | 'mention'; channelId: string; channelName: string; messageId: string | null; fromName: string }>>([]);
 
   useEffect(() => {
     async function loadCats() {
@@ -47,12 +56,45 @@ export function Comunidade() {
       const map: Record<string, Array<{ id: string; name: string }>> = {};
       (chans ?? []).forEach(c => { (map[c.category_id] ||= []).push({ id: c.id, name: c.name }); });
       const catsArr = (cats ?? []) as Array<{ id: string; name: string; order: number | null }>;
-      const arr = catsArr.map(c => ({ id: c.id, name: c.name, order: c.order ?? 0, channels: map[c.id] ?? [] }));
+      const arr = catsArr.map(c => ({ id: c.id, name: c.name, order: c.order ?? 0, channels: (map[c.id] ?? []).filter(ch => !ch.name.startsWith('dm-')) }));
+      const dmChans = (chans ?? []).filter(c => (c.name ?? '').startsWith('dm-')).map(c => ({ id: c.id, name: c.name }));
+      const lastOrder = (arr[arr.length - 1]?.order ?? 0) + 1;
+      arr.push({ id: 'dm-virtual', name: 'Mensagens Privadas', order: lastOrder, channels: dmChans });
       setCategories(arr);
+      // Compute display names for DM channels
+      try {
+        for (const ch of dmChans) {
+          if ((ch.name ?? '').startsWith('dm-')) {
+            const { data: members } = await supabase
+              .from('channel_members')
+              .select('user_id')
+              .eq('channel_id', ch.id);
+            let otherId = (members ?? [])
+              .map(m => m.user_id)
+              .find(uid => uid !== user?.id) ?? null;
+            if (!otherId) {
+              const segs = ch.name.match(/^dm-([^-]+)-([^-]+)/);
+              const p1 = segs?.[1];
+              const p2 = segs?.[2];
+              const candidate = Object.keys(authorsMap).find(k => (p1 && k.startsWith(p1)) || (p2 && k.startsWith(p2)));
+              if (candidate && candidate !== user?.id) otherId = candidate;
+            }
+            if (otherId) {
+              const { data: prof } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('user_id', otherId)
+                .maybeSingle();
+              const name = (prof?.full_name ?? authorsMap[otherId]?.name ?? 'Mensagem privada') as string;
+              setDmNames(prev => ({ ...prev, [ch.id]: name }));
+            }
+          }
+        }
+      } catch (_e) { void 0; }
       if (!activeChannelName && arr.length && arr[0].channels.length) setActiveChannelName(arr[0].channels[0].name);
     }
     loadCats();
-  }, [activeChannelName]);
+  }, [activeChannelName, user?.id, authorsMap]);
 
   
 
@@ -124,6 +166,64 @@ export function Comunidade() {
   const activeChannel = categories
     .flatMap(cat => cat.channels)
     .find(c => c.name === activeChannelName);
+
+  const getChannelLabel = (ch?: { id?: string; name?: string }) => {
+    if (!ch) return '';
+    const nm = ch.name ?? '';
+    if (nm.startsWith('dm-')) {
+      if (ch.id && dmNames[ch.id]) return dmNames[ch.id];
+      const segs = nm.match(/^dm-([^-]+)-([^-]+)/);
+      const p1 = segs?.[1];
+      const p2 = segs?.[2];
+      const otherId = Object.keys(authorsMap).find(k => ((p1 && k.startsWith(p1)) || (p2 && k.startsWith(p2))) && k !== user?.id);
+      if (otherId) return authorsMap[otherId]?.name ?? 'Mensagem privada';
+      return 'Mensagem privada';
+    }
+    return nm;
+  };
+
+  const loadNotificationItems = useCallback(async () => {
+    if (!user?.id) return;
+    const items: Array<{ type: 'dm' | 'mention'; channelId: string; channelName: string; messageId: string | null; fromName: string }> = [];
+    try {
+      const { data: memberRows } = await supabase.from('channel_members').select('channel_id').eq('user_id', user.id);
+      const dmIds = (memberRows ?? []).map(r => r.channel_id);
+      for (const cid of dmIds) {
+        const { data: chan } = await supabase.from('community_channels').select('id,name').eq('id', cid).maybeSingle();
+        if (!chan || !chan.name?.startsWith('dm-')) continue;
+        const { data: last } = await supabase
+          .from('messages')
+          .select('id, author_id')
+          .eq('channel_id', cid)
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(1);
+        const lastAuthor = last?.[0]?.author_id ?? null;
+        let fromName = 'Mensagem privada';
+        if (lastAuthor) {
+          const { data: prof } = await supabase.from('profiles').select('full_name').eq('user_id', lastAuthor).maybeSingle();
+          fromName = (prof?.full_name ?? fromName) as string;
+        }
+        items.push({ type: 'dm', channelId: cid as string, channelName: chan.name, messageId: last?.[0]?.id ?? null, fromName });
+      }
+      const display = (profile?.full_name ?? user?.name ?? '').trim();
+      if (display) {
+        const { data: mentionRows } = await supabase
+          .from('messages')
+          .select('id, channel_id, author_id, content')
+          .ilike('content', `%@${display}%`)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        for (const m of (mentionRows ?? [])) {
+          const { data: chan } = await supabase.from('community_channels').select('id,name').eq('id', m.channel_id as string).maybeSingle();
+          const { data: prof } = await supabase.from('profiles').select('full_name').eq('user_id', m.author_id as string).maybeSingle();
+          const fromName = (prof?.full_name ?? 'Usuário') as string;
+          if (chan) items.push({ type: 'mention', channelId: chan.id, channelName: chan.name, messageId: m.id as string, fromName });
+        }
+      }
+    } catch (_e) { void 0; }
+    setNotificationItems(items);
+  }, [user?.id, profile?.full_name, user?.name]);
 
   // Resolver canal no Supabase por nome (se existir) e carregar última leitura
   useEffect(() => {
@@ -225,6 +325,60 @@ export function Comunidade() {
     }
   };
 
+  const triggerFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || !dbChannelId || !user?.id) return;
+    for (const file of Array.from(files)) {
+      try {
+        const path = `attachments/${dbChannelId}/${Date.now()}_${file.name}`;
+        const { error: upErr } = await supabase.storage.from('community').upload(path, file, { upsert: false });
+        if (upErr) continue;
+        const { data: msgData, error: insErr } = await supabase
+          .from('messages')
+          .insert({ channel_id: dbChannelId, author_id: user.id, content: messageInput.trim() || '' })
+          .select('id, content, author_id, channel_id, created_at')
+          .maybeSingle();
+        if (insErr || !msgData) continue;
+        const msg: Message = { id: msgData.id, content: msgData.content, authorId: msgData.author_id, channelId: msgData.channel_id, createdAt: msgData.created_at };
+        setVisibleMessages(prev => [...prev, msg]);
+        await supabase
+          .from('message_attachments')
+          .insert({ message_id: msg.id, type: file.type.startsWith('image/') ? 'image' : file.type.startsWith('audio/') ? 'audio' : 'file', url: path });
+        await loadAttachmentsFor([msg]);
+        setMessageInput('');
+      } catch (_e) { void 0; }
+    }
+    e.target.value = '';
+  };
+
+  
+
+  useEffect(() => {
+    const hasAt = /@$/.test(messageInput);
+    const m = messageInput.match(/@([\p{L}0-9_\- ]{0,30})$/u);
+    const q = m?.[1]?.trim() ?? '';
+    if (hasAt || q) {
+      const base = members.map(mb => ({ id: mb.user_id, name: mb.full_name ?? '' }));
+      const cands = q ? base.filter(u => u.name.toLowerCase().includes(q.toLowerCase())) : base;
+      setMentionCandidates(cands.slice(0, 10));
+      setMentionOpen(true);
+    } else {
+      setMentionOpen(false);
+    }
+  }, [messageInput, members]);
+
+  const chooseMention = (cand: { id: string; name: string }) => {
+  const replaced = messageInput.replace(/@([\p{L}0-9_\- ]{1,30})$/u, `@${cand.name} `);
+  setMessageInput(replaced);
+  setMentionOpen(false);
+  };
+
+  
+
   const handleSendMessage = async () => {
     if (!messageInput.trim()) return;
     if (!dbChannelId || !user?.id) return;
@@ -295,26 +449,54 @@ export function Comunidade() {
     loadMembers();
   }, []);
 
-  // Contagens via RPC
+  const recomputeCounts = useCallback(async () => {
+    if (!user?.id || !categories.length) return;
+    const { data } = await supabase.rpc('get_unread_counts', { uid: user.id });
+    const map: Record<string, number> = {};
+    ((data ?? []) as Array<{ channel_id: string; unread_count: number }>).forEach(row => { map[row.channel_id] = row.unread_count; });
+    setUnreadCounts(map);
+    const display = (profile?.full_name ?? user?.name ?? '').trim();
+    const { data: notif } = await supabase.rpc('get_notifications', { uid: user.id, display_name: display });
+    const dm = (notif?.[0]?.dm_unread ?? 0) as number;
+    const mentions = (notif?.[0]?.mentions_unread ?? 0) as number;
+    setNotifCount(dm + mentions);
+  }, [user?.id, categories.length, profile?.full_name, user?.name]);
+
   useEffect(() => {
     let cancelled = false;
-    async function computeUnreadRpc() {
-      if (!user?.id || !categories.length) return;
-      const { data } = await supabase.rpc('get_unread_counts', { uid: user.id });
-      if (cancelled) return;
-      const map: Record<string, number> = {};
-      ((data ?? []) as Array<{ channel_id: string; unread_count: number }>).forEach(row => { map[row.channel_id] = row.unread_count; });
-      setUnreadCounts(map);
-      const display = (profile?.full_name ?? user?.name ?? '').trim();
-      const { data: notif } = await supabase.rpc('get_notifications', { uid: user.id, display_name: display });
-      if (cancelled) return;
-      const dm = (notif?.[0]?.dm_unread ?? 0) as number;
-      const mentions = (notif?.[0]?.mentions_unread ?? 0) as number;
-      setNotifCount(dm + mentions);
-    }
-    computeUnreadRpc();
+    (async () => { if (!cancelled) await recomputeCounts(); })();
     return () => { cancelled = true; };
-  }, [categories, user?.id, user?.name, profile?.full_name]);
+  }, [recomputeCounts]);
+
+  useEffect(() => {
+    if (!dbChannelId) return;
+    if (realtimeRef.current) { try { realtimeRef.current.unsubscribe(); } catch (_e) { void 0 } }
+    const ch = supabase
+      .channel(`messages:${dbChannelId}`)
+      .on('postgres_changes', { schema: 'public', table: 'messages', event: 'INSERT', filter: `channel_id=eq.${dbChannelId}` }, async payload => {
+        const row = payload.new as { id: string; content: string; author_id: string; channel_id: string; created_at: string };
+        const msg: Message = { id: row.id, content: row.content, authorId: row.author_id, channelId: row.channel_id, createdAt: row.created_at };
+        setVisibleMessages(prev => (prev.some(m => m.id === msg.id) ? prev : [...prev, msg]));
+        await loadAttachmentsFor([msg]);
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        await recomputeCounts();
+      })
+      .on('postgres_changes', { schema: 'public', table: 'messages', event: 'UPDATE', filter: `channel_id=eq.${dbChannelId}` }, async payload => {
+        const row = payload.new as { id: string; content: string };
+        setVisibleMessages(prev => prev.map(m => m.id === row.id ? { ...m, content: row.content } : m));
+        await recomputeCounts();
+      })
+      .on('postgres_changes', { schema: 'public', table: 'messages', event: 'DELETE', filter: `channel_id=eq.${dbChannelId}` }, async payload => {
+        const row = payload.old as { id: string };
+        setVisibleMessages(prev => prev.filter(m => m.id !== row.id));
+        await recomputeCounts();
+      });
+    ch.subscribe();
+    realtimeRef.current = ch;
+    return () => {
+      try { ch.unsubscribe(); } catch (_e) { void 0 }
+    };
+  }, [dbChannelId, recomputeCounts]);
 
   const ensureAuthor = async (authorId: string) => {
     if (authorsMap[authorId]) return;
@@ -386,7 +568,7 @@ export function Comunidade() {
                 <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 uppercase tracking-wide cursor-pointer">
                   {category.name}
                 </h2>
-                {isAdmin && (
+                {isAdmin && category.id !== 'dm-virtual' && (
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100">
                     <button onClick={() => createCategory()}><Plus className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
                     <button onClick={() => renameCategory(category.id, category.name)}><Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
@@ -410,14 +592,14 @@ export function Comunidade() {
                     `}
                   >
                     <Hash className="h-5 w-5 mr-1.5 text-gray-500 dark:text-gray-500" />
-                    <span className="truncate font-medium">{channel.name}</span>
+                    <span className="truncate font-medium">{getChannelLabel(channel)}</span>
                     </button>
                     {(unreadCounts[channel.id] ?? 0) > 0 && (
                       <Badge className="ml-2 bg-red-500 hover:bg-red-600 text-white h-5 px-1.5">
                         {unreadCounts[channel.id]}
                       </Badge>
                     )}
-                    {isAdmin && (
+                    {isAdmin && category.id !== 'dm-virtual' && (
                       <div className="ml-2 flex items-center gap-2 opacity-0 group-hover:opacity-100">
                         <button onClick={() => createChannel(category.id)}><Plus className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
                         <button onClick={() => renameChannel(channel.id, category.id, channel.name)}><Edit className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
@@ -522,23 +704,18 @@ export function Comunidade() {
       <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#000000]">
         {/* Channel Header */}
         <div className="h-12 px-4 flex items-center justify-between shadow-sm border-b border-gray-200 dark:border-[#1f2023]">
-          <div className="flex items-center min-w-0">
-            <Menu className="lg:hidden h-6 w-6 mr-4 text-gray-500 dark:text-gray-400" onClick={() => setShowMobileSidebar(true)} />
-            <Hash className="h-6 w-6 text-gray-500 dark:text-gray-500 mr-2 flex-shrink-0" />
-            <div className="flex flex-col">
-              <h3 className="font-bold text-gray-900 dark:text-white truncate">{activeChannel?.name}</h3>
+            <div className="flex items-center min-w-0">
+              <Menu className="lg:hidden h-6 w-6 mr-4 text-gray-500 dark:text-gray-400" onClick={() => setShowMobileSidebar(true)} />
+              <Hash className="h-6 w-6 text-gray-500 dark:text-gray-500 mr-2 flex-shrink-0" />
+              <div className="flex flex-col">
+              <h3 className="font-bold text-gray-900 dark:text-white truncate">{getChannelLabel(activeChannel)}</h3>
               <span className="text-xs text-gray-500 dark:text-gray-400 truncate hidden sm:block">
-                Tópico do canal: Discussões sobre {activeChannel?.name.replace(/-/g, ' ')}
+                Tópico do canal: Discussões sobre {getChannelLabel(activeChannel).replace(/-/g, ' ')}
               </span>
+              </div>
             </div>
-          </div>
           
           <div className="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
-            <Bell className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" />
-            <Users
-              className={`h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer ${showMembersSidebar ? 'text-gray-900 dark:text-white' : ''}`}
-              onClick={() => setShowMembersSidebar(!showMembersSidebar)}
-            />
             <div className="relative hidden sm:block">
               <input
                 type="text"
@@ -548,13 +725,39 @@ export function Comunidade() {
               <Search className="h-4 w-4 absolute right-2 top-1.5 text-gray-500 dark:text-gray-400" />
             </div>
             <div className="relative">
-              <Bell className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" onClick={() => setShowDmModal(true)} />
+              <Bell className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" onClick={async () => { setShowNotifDropdown(v => !v); if (!showNotifDropdown) await loadNotificationItems(); }} />
               {notifCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full px-1.5 py-[1px]">
                   {notifCount}
                 </span>
               )}
+              {showNotifDropdown && (
+                <div className="absolute right-0 mt-2 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1f2023] rounded shadow-lg w-80 z-50">
+                  <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-[#1f2023]">Notificações</div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {notificationItems.length === 0 ? (
+                      <div className="px-3 py-3 text-sm text-gray-600 dark:text-gray-300">Sem notificações</div>
+                    ) : notificationItems.map((n, i) => (
+                      <button key={`${n.type}-${n.channelId}-${n.messageId ?? i}`} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1c] text-sm" onClick={() => {
+                        setActiveChannelName(n.channelName);
+                        setShowNotifDropdown(false);
+                      }}>
+                        {n.type === 'dm' ? (
+                          <span><strong>{n.fromName}</strong> enviou uma mensagem privada</span>
+                        ) : (
+                          <span><strong>{n.fromName}</strong> mencionou você em <em>#{n.channelName}</em></span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+            <MessageSquare className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" onClick={() => setShowDmModal(true)} />
+            <Users
+              className={`h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer ${showMembersSidebar ? 'text-gray-900 dark:text-white' : ''}`}
+              onClick={() => setShowMembersSidebar(!showMembersSidebar)}
+            />
             <HelpCircle className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" />
           </div>
         </div>
@@ -571,8 +774,8 @@ export function Comunidade() {
                 <Hash className="h-10 w-10 text-gray-500 dark:text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Bem-vindo ao #{activeChannel?.name}!</h2>
-                <p className="text-gray-500 dark:text-gray-400">Este é o começo do canal {activeChannel?.name}.</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Diga olá para #{getChannelLabel(activeChannel)}</h2>
+                <p className="text-gray-500 dark:text-gray-400">Este é o começo do canal {getChannelLabel(activeChannel)}.</p>
               </div>
             </div>
           ) : (
@@ -648,10 +851,10 @@ export function Comunidade() {
 
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                           <button onClick={() => setReplyToId(msg.id)} className="hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"><Reply className="h-3.5 w-3.5" />Responder</button>
-                          {(user?.id === msg.authorId || isAdmin) && (
+                          {(user?.id === msg.authorId) && (
                             <button onClick={() => { setEditingId(msg.id); setEditText(msg.content); }} className="hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1"><Edit className="h-3.5 w-3.5" />Editar</button>
                           )}
-                          {isAdmin && (
+                          {(user?.id === msg.authorId || isAdmin) && (
                             <button onClick={async () => {
                               try {
                                 await supabase.from('messages').delete().eq('id', msg.id);
@@ -699,7 +902,7 @@ export function Comunidade() {
         {/* Message Input */}
         <div className="px-4 pb-6 pt-2">
           <div className="bg-gray-100 dark:bg-[#1a1a1c] rounded-lg px-4 py-2.5 flex items-center space-x-4 border border-gray-200 dark:border-transparent">
-            <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" onClick={triggerFileDialog}>
               <Plus className="h-6 w-6 bg-gray-300 dark:bg-gray-400 text-gray-100 dark:text-[#383a40] rounded-full p-1 hover:bg-gray-400 dark:hover:bg-gray-200" />
             </button>
             <input
@@ -707,17 +910,32 @@ export function Comunidade() {
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={`Conversar em #${activeChannel?.name}`}
+              placeholder={`Conversar em #${getChannelLabel(activeChannel)}`}
               className="bg-transparent border-none focus:ring-0 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 flex-1 h-full py-1"
             />
             <div className="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
-              <GiftIcon className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" />
-              <div className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer flex items-center justify-center">
-                <span className="text-xs font-bold border border-current rounded px-0.5">GIF</span>
+              <div className="relative">
+                <Smile className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" onClick={() => setShowEmojiPicker(v => !v)} />
+                {showEmojiPicker && (
+                  <div className="absolute bottom-8 right-0 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1f2023] rounded shadow-lg w-72 p-2 grid grid-cols-8 gap-2 z-50">
+                    {['😀','😃','😄','😁','😆','🥹','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🫣','🤭','🫢','🫡','🤫','🤥','😶','🫥','😐','🫤','😑','😬','🙄','😮‍💨','🤤','😴','😪','😮','😯','😲','😳','🥱','🤧','🤒','🤕','🤑','🤠','😈','👿','💀','☠️','👻','👽','🤖','🎃','👋','🤚','✋','🖐️','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','👍','👎','✊','👊','👏','🙌','👐','🤲','🙏','💪','🦾','🫶','❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💬','🗯️','💭','🌟','✨','🔥','💥','🎉','🎊','🎈'].map(e => (
+                      <button key={e} onClick={() => { setMessageInput(prev => `${prev}${e}`); setShowEmojiPicker(false); }} className="text-xl leading-none">{e}</button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <Smile className="h-6 w-6 hover:text-gray-700 dark:hover:text-gray-200 cursor-pointer" />
             </div>
           </div>
+          {mentionOpen && !!mentionCandidates.length && (
+            <div className="mt-2 bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-[#1f2023] rounded shadow-sm w-64">
+              {mentionCandidates.map(c => (
+                <button key={c.id} onClick={() => chooseMention(c)} className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1c] text-sm">
+                  @{c.name}
+                </button>
+              ))}
+            </div>
+          )}
+          <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFilesSelected} />
         </div>
       </div>
 
@@ -737,7 +955,7 @@ export function Comunidade() {
                         <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase px-2">Disponível — {online.length}</div>
                         <div className="space-y-1 mt-1">
                           {online.map(user => (
-                            <div key={`${user.user_id}-on`} className="flex items-center px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#1a1a1c] cursor-pointer group opacity-90 hover:opacity-100">
+                            <div key={`${user.user_id}-on`} className="flex items-center px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#1a1a1c] cursor-pointer group opacity-90 hover:opacity-100" onClick={() => setShowDmModal(true)}>
                               <div className="relative mr-3">
                                 <Avatar src={(user.avatar_url ?? undefined) as unknown as string} alt={(user.full_name ?? 'Usuário') as string} className="h-8 w-8" />
                                 <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-[3px] border-gray-100 dark:border-[#0a0a0a] bg-green-500" />
@@ -765,7 +983,7 @@ export function Comunidade() {
                         <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase px-2">Offline — {offline.length}</div>
                         <div className="space-y-1 mt-1">
                           {offline.map(user => (
-                            <div key={`${user.user_id}-off`} className="flex items-center px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#1a1a1c] cursor-pointer group opacity-90 hover:opacity-100">
+                            <div key={`${user.user_id}-off`} className="flex items-center px-2 py-1.5 rounded hover:bg-gray-200 dark:hover:bg-[#1a1a1c] cursor-pointer group opacity-90 hover:opacity-100" onClick={() => setShowDmModal(true)}>
                               <div className="relative mr-3">
                                 <Avatar src={(user.avatar_url ?? undefined) as unknown as string} alt={(user.full_name ?? 'Usuário') as string} className="h-8 w-8" />
                                 <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-[3px] border-gray-100 dark:border-[#0a0a0a] bg-gray-500" />
@@ -804,26 +1022,5 @@ export function Comunidade() {
         </div>
       )}
     </div>
-  );
-}
-
-// Ícone de Presente (Gift) customizado pois não está no lucide-react padrão
-function GiftIcon({ className }: { className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <rect x="3" y="8" width="18" height="4" rx="1" />
-      <path d="M12 8v13" />
-      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
-      <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" />
-    </svg>
   );
 }

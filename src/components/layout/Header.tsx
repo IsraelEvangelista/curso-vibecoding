@@ -1,7 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Sun, Moon, Menu, X, LogOut, BookOpen, Users, Settings, ChevronDown } from "lucide-react";
+import { Sun, Moon, Menu, X, LogOut, BookOpen, Users } from "lucide-react";
 
 import { Avatar } from "@/components/ui";
 import { useAuth } from "@/context/AuthContext";
@@ -9,56 +8,25 @@ import { supabase } from "@/lib/supabase";
 import { Theme, applyTheme } from "@/lib/theme";
 import { ThemeHero } from "@/components/features/ThemeHero";
 
-import logoImg from "@/assets/logo.png";
-
-interface MenuPosition {
-  top: number;
-  right: number;
-}
+import dashmakerLogo from "@/assets/dashmaker_logo.png";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof localStorage !== "undefined") {
       return (localStorage.getItem("theme") as Theme) || "dark";
     }
     return "dark";
   });
-  const [menuPosition, setMenuPosition] = useState<MenuPosition>({
-    top: 0,
-    right: 16,
-  });
-  const [hasMounted, setHasMounted] = useState(false);
   const { profile, user } = useAuth();
 
-  const themeButtonRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (
-      !isThemeMenuOpen ||
-      typeof window === "undefined" ||
-      !themeButtonRef.current
-    )
-      return;
-    const rect = themeButtonRef.current.getBoundingClientRect();
-    setMenuPosition({
-      top: rect.bottom + 8,
-      right: Math.max(window.innerWidth - rect.right, 16),
-    });
-  }, [isThemeMenuOpen]);
-
-  const handleThemeChange = (newTheme: Theme) => {
+  const handleThemeChange = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     applyTheme(newTheme);
-    setIsThemeMenuOpen(false);
-    // Não recarrega mais - o tema é aplicado dinamicamente
   };
 
   const path = location.pathname
@@ -70,75 +38,22 @@ export function Header() {
     ...(currentCourseId ? [{ icon: BookOpen, label: "Aulas", href: `/curso/${currentCourseId}` }] : []),
   ]
 
-  const themeMenu =
-    hasMounted && isThemeMenuOpen
-      ? createPortal(
-          <>
-            <div
-              className="fixed inset-0 z-[14000]"
-              onClick={() => setIsThemeMenuOpen(false)}
-            />
-            <div
-              className="fixed z-[15000] w-64 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden"
-              style={{ top: menuPosition.top, right: menuPosition.right }}
-            >
-              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
-                  Temas
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => handleThemeChange("light")}
-                    className={`flex items-center space-x-2 p-3 rounded-md transition-all ${
-                      theme === "light"
-                        ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 ring-2 ring-primary-500"
-                        : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
-                    }`}
-                  >
-                    <Sun className="h-5 w-5" />
-                    <div className="text-left flex-1">
-                      <div className="text-sm font-medium">Claro</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleThemeChange("dark")}
-                    className={`flex items-center space-x-2 p-3 rounded-md transition-all ${
-                      theme === "dark"
-                        ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 ring-2 ring-primary-500"
-                        : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600"
-                    }`}
-                  >
-                    <Moon className="h-5 w-5" />
-                    <div className="text-left flex-1">
-                      <div className="text-sm font-medium">Escuro</div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>,
-          document.body,
-        )
-      : null;
-
   return (
     <>
       <ThemeHero />
-
-      {themeMenu}
 
       <header className="header-3d fixed top-0 left-0 right-0 z-[12000]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <img
-                src={logoImg}
-                alt="Vibe Coding"
-                className="h-8 w-auto mr-3"
+                src={dashmakerLogo}
+                alt="DashMaker"
+                className="h-10 w-auto mr-3 object-contain"
               />
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Vibe Coding
+                  DashMaker
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Plataforma de Aprendizado
@@ -166,27 +81,19 @@ export function Header() {
             <div className="flex items-center space-x-4">
               <div className="hidden sm:block">
                 <button
-                  ref={themeButtonRef}
-                  onClick={() => {
-                    if (!isThemeMenuOpen) {
-                      const btn = themeButtonRef.current;
-                      if (btn && typeof window !== "undefined") {
-                        const rect = btn.getBoundingClientRect();
-                        setMenuPosition({
-                          top: rect.bottom + 8,
-                          right: Math.max(window.innerWidth - rect.right, 16),
-                        });
-                      }
-                      setIsThemeMenuOpen(true);
-                    } else {
-                      setIsThemeMenuOpen(false);
-                    }
-                  }}
-                  className="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-                  title="Configurar Tema"
+                  onClick={handleThemeChange}
+                  className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  title={`Alternar para tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
                 >
-                  <Settings className="h-5 w-5" />
-                  <ChevronDown className="h-4 w-4" />
+                  <div className="absolute inset-0 flex items-center justify-between px-1.5">
+                    <Sun className="w-4 h-4 text-yellow-500" />
+                    <Moon className="w-4 h-4 text-primary-400" />
+                  </div>
+                  <div
+                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                      theme === 'dark' ? 'translate-x-7' : 'translate-x-0'
+                    }`}
+                  />
                 </button>
               </div>
 
@@ -249,34 +156,22 @@ export function Header() {
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
                   <div className="px-3 py-2 space-y-2">
                     {/* Mobile Theme Switch */}
-                    <div className="space-y-2">
-                      <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
-                        Tema
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => handleThemeChange("light")}
-                          className={`flex items-center space-x-2 p-2 rounded-md transition-all text-sm ${
-                            theme === "light"
-                              ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 ring-2 ring-primary-500"
-                              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tema</span>
+                      <button
+                        onClick={handleThemeChange}
+                        className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none"
+                      >
+                        <div className="absolute inset-0 flex items-center justify-between px-1.5">
+                          <Sun className="w-4 h-4 text-yellow-500" />
+                          <Moon className="w-4 h-4 text-primary-400" />
+                        </div>
+                        <div
+                          className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                            theme === 'dark' ? 'translate-x-7' : 'translate-x-0'
                           }`}
-                        >
-                          <Sun className="h-4 w-4" />
-                          <span>Claro</span>
-                        </button>
-                        <button
-                          onClick={() => handleThemeChange("dark")}
-                          className={`flex items-center space-x-2 p-2 rounded-md transition-all text-sm ${
-                            theme === "dark"
-                              ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 ring-2 ring-primary-500"
-                              : "bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"
-                          }`}
-                        >
-                          <Moon className="h-4 w-4" />
-                          <span>Escuro</span>
-                        </button>
-                      </div>
+                        />
+                      </button>
                     </div>
                     
                     <button className="flex items-center space-x-3 w-full text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 p-2 rounded-md" onClick={async () => { await supabase.auth.signOut() }}>
