@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Card, Button, Badge } from '@/components/ui'
 import { useAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { BookOpen, Award, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { BookOpen, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Lesson } from '@/types'
 
 type Props = {
@@ -74,15 +74,7 @@ export const LessonCard: FC<Props> = ({ lesson, expanded, onToggleExpand, onOpen
           <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Seções</div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <BookOpen className="h-4 w-4" />
-            <span>Conteúdo</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <CheckCircle className="h-4 w-4" />
-            <span>Quiz (10 questões)</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Award className="h-4 w-4" />
-            <span>Desafio Prático</span>
+            <span>Conceito</span>
           </div>
           {isAdmin && (
             <div className="mt-2">

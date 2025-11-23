@@ -41,8 +41,19 @@
 3. Aulas/Slides:
    - `loadSlideDeck(id)` resolve `lesson_number` no Supabase quando UUID não está no mapa e carrega `aulaN` correspondente.
 
-4. Correção SlideViewer:
-   - `escapeHtml` padronizado para evitar erros de string e proteger contra XSS básico (uso de `&amp;`, `&lt;`, `&gt;`, `&quot;`, `&#39;`).
+4. Correção SlideViewer e Navegação:
+   - `escapeHtml` padronizado para evitar erros de string e proteger contra XSS básico.
+   - Navegação de saída (`handleExit`) corrigida em `AulaSlidePage.tsx`:
+     - Prioriza `slideDeck.courseId` (adicionado à interface `SlideDeck` e carregado via `loadSlideDeck`).
+     - Substituído `window.location.href` por `navigate` para evitar reload e perda de sessão.
+   - Slides da Aula 06 implementados e ajustados (remoção de títulos duplicados).
+
+5. Slides Aula 07 (Concluído):
+   - Slides implementados com foco em Automação Cognitiva com n8n.
+   - Loader atualizado e verificado.
+
+6. Slides Aula 08 (Em andamento):
+   - Foco: Interface Generativa (v0.dev), Upload Inteligente, Realtime e Deploy.
 
 ## Decisões e Segurança
 - RLS equilibradas em `2025112013_community_policies.sql`.

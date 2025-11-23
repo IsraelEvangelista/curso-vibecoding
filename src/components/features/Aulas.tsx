@@ -4,6 +4,7 @@ import { LessonCard } from "./Aulas/LessonCard";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { FileDown } from "lucide-react";
 import type { Lesson } from "@/types";
 
 export function Aulas({ courseId }: { courseId?: string }) {
@@ -74,14 +75,22 @@ export function Aulas({ courseId }: { courseId?: string }) {
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
             Aulas do Curso
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Acesso progressivo ao conteúdo do Curso Vibe Coding
-          </p>
-          {(profile?.full_name || user?.name) && (
-            <div className="mt-3 text-sm font-medium text-gray-900 dark:text-white">
-              Bem-vindo, {profile?.full_name ?? user?.name}!
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-600 dark:text-gray-400">
+                Acesso progressivo ao conteúdo do Curso Vibe Coding
+              </p>
+              {(profile?.full_name || user?.name) && (
+                <div className="mt-3 text-sm font-medium text-gray-900 dark:text-white">
+                  Bem-vindo, {profile?.full_name ?? user?.name}!
+                </div>
+              )}
             </div>
-          )}
+            <div className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 cursor-pointer hover:text-theme-light-600 dark:hover:text-theme-dark-400 transition-colors">
+              <FileDown className="h-6 w-6" />
+              <span className="text-xs font-medium">Arquivos para Download</span>
+            </div>
+          </div>
         </div>
 
         {loadError && (

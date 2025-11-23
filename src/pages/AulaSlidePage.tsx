@@ -60,13 +60,14 @@ export function AulaSlidePage() {
 
   const handleExit = () => {
     // Validação robusta do ID do curso
-    const cleanCourseId = courseId?.trim();
+    // Prioriza o courseId vindo do slideDeck (banco de dados), depois da URL
+    const courseIdToUse = slideDeck?.courseId || courseId;
+    const cleanCourseId = courseIdToUse?.trim();
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     
     if (cleanCourseId && uuidRegex.test(cleanCourseId)) {
-      // Usando window.location.href para garantir que a navegação ocorra corretamente
-      // e limpar qualquer estado de rota inválido
-      window.location.href = `/curso/${cleanCourseId}`;
+      // Usando navigate para manter o estado da aplicação (SPA) e evitar logout acidental
+      navigate(`/curso/${cleanCourseId}`);
     } else {
       navigate('/cursos');
     }

@@ -229,6 +229,7 @@ export interface Slide {
 export interface SlideDeck {
   id: string;
   lessonId: string;
+  courseId?: string;
   title: string;
   slides: Slide[];
   currentSlideIndex: number;
