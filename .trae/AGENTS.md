@@ -55,6 +55,33 @@
 6. Slides Aula 08 (Em andamento):
    - Foco: Interface Generativa (v0.dev), Upload Inteligente, Realtime e Deploy.
 
+7. Mobile UX — Refinamentos (2025-11-23):
+   - **Swipe Gestures**: Implementação robusta que diferencia swipe horizontal de scroll vertical.
+     - Touch handlers: `onTouchStart`, `onTouchMove`, `onTouchEnd` com `useRef` para performance.
+     - Lógica: ignora gestos se `Math.abs(distanceY) > Math.abs(distanceX)` (prioriza scroll vertical).
+     - Mouse handlers: `onMouseDown`, `onMouseMove`, `onMouseUp`, `onMouseLeave` para testar no desktop.
+     - Distância mínima: 50px para considerar um swipe válido.
+     - CSS: `touchAction: 'pan-y'` permite scroll vertical nativo sem conflito.
+   - **Footer (ProgressIndicator)**: Redesenho em estilo "carousel".
+     - Indicador ativo sempre centralizado via `scrollIntoView({ inline: 'center' })`.
+     - Padding lateral: `calc(50% - 12px)` permite centralizar primeiro e último item.
+     - Scrollbar escondida: `scrollbarWidth: 'none'`, `msOverflowStyle: 'none'`, webkit-scrollbar.
+     - Texto "Slide X de Y" centralizado acima dos indicadores.
+   - **Header Mobile**: Botão de tema removido do topo (agora só no menu dropdown).
+   - **SlideHeader Mobile**: Botões Anterior/Próximo ocultos (`hidden md:flex`).
+   - **Commit**: `8383a83` — pushed to `main`.
+
+8. Sticky Horizontal Scrollbars (2025-11-23):
+   - **Problema**: Usuários não conseguiam visualizar facilmente quando havia conteúdo com overflow horizontal.
+   - **Solução**: Barras de rolagem horizontal sempre visíveis e estilizadas.
+     - Wrapper: `sticky-scroll-wrapper` envolve todos os blocos `<pre>` e tabelas.
+     - CSS customizado em `globals.css` com:
+       - Altura fixa de 10px para melhor visibilidade
+       - Cores adaptadas ao tema (claro/escuro)
+       - Efeito hover para melhor feedback visual
+     - Aplicado em todos os tipos de slide (text, code, image-text).
+   - **Arquivos**: `SlideViewer.tsx` (4 renderizações), `globals.css`.
+
 ## Decisões e Segurança
 - RLS equilibradas em `2025112013_community_policies.sql`.
 - Funções RPC `SECURITY DEFINER` com `search_path = public`.

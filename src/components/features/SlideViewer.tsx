@@ -435,7 +435,7 @@ export function SlideViewer({
           .replace(/\n\n/g, '<br><br>');
         text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
           const { lang, code } = codeBlocks[Number(i)];
-          return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+          return `<div class="sticky-scroll-wrapper"><pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre></div>`;
         });
         return text;
       })();
@@ -537,7 +537,7 @@ export function SlideViewer({
                         .replace(/\n\n/g, '<br><br>');
                       text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                         const { lang, code } = codeBlocks[Number(i)];
-                        return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                        return `<div class="sticky-scroll-wrapper"><pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre></div>`;
                       });
                       return text;
                     })()
@@ -599,7 +599,7 @@ export function SlideViewer({
                     .replace(/\n\n/g, '<br><br>');
                   text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                     const { lang, code } = codeBlocks[Number(i)];
-                    return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                    return `<div class="sticky-scroll-wrapper"><pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre></div>`;
                   });
                   return text;
                 })()
@@ -653,7 +653,7 @@ export function SlideViewer({
                     .replace(/\n\n/g, '<br><br>');
                   text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                     const { lang, code } = codeBlocks[Number(i)];
-                    return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
+                    return `<div class="sticky-scroll-wrapper"><pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre></div>`;
                   });
                   return text;
                 })()
@@ -674,7 +674,6 @@ export function SlideViewer({
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
-      style={{ touchAction: 'pan-y' }}
     >
       {/* Header fixo */}
       <SlideHeader
