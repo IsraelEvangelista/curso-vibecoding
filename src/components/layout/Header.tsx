@@ -79,7 +79,7 @@ export function Header() {
             </nav>
 
             <div className="flex items-center space-x-4">
-              <div className="hidden sm:block">
+              <div className="hidden md:block">
                 <button
                   onClick={handleThemeChange}
                   className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -135,56 +135,65 @@ export function Header() {
             </div>
           </div>
 
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4">
-              <nav className="space-y-3">
-                {navigationItems.map((item) => (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
-                      location.pathname === item.href
-                        ? "bg-gray-100 text-primary-600 dark:bg-gray-700 dark:text-primary-400"
-                        : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
-                  <div className="px-3 py-2 space-y-2">
-                    {/* Mobile Theme Switch */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tema</span>
-                      <button
-                        onClick={handleThemeChange}
-                        className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none"
-                      >
-                        <div className="absolute inset-0 flex items-center justify-between px-1.5">
-                          <Sun className="w-4 h-4 text-yellow-500" />
-                          <Moon className="w-4 h-4 text-primary-400" />
-                        </div>
-                        <div
-                          className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                            theme === 'dark' ? 'translate-x-7' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                    
-                    <button className="flex items-center space-x-3 w-full text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 p-2 rounded-md" onClick={async () => { await supabase.auth.signOut() }}>
-                      <LogOut className="h-5 w-5" />
-                      <span>Sair</span>
-                    </button>
-                  </div>
-                </div>
-              </nav>
-            </div>
-          )}
         </div>
       </header>
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed top-16 left-0 right-0 bottom-0 bg-black/50 z-[12001] animate-in fade-in duration-200" onClick={() => setIsMobileMenuOpen(false)}>
+          <div 
+            className="bg-white dark:bg-[#0a0a0a] border-b border-gray-200 dark:border-gray-700 shadow-xl animate-in slide-in-from-top-2 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <nav className="space-y-1 p-4">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-colors ${
+                    location.pathname === item.href
+                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
+                      : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              ))}
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+                <div className="space-y-2">
+                  {/* Mobile Theme Switch */}
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tema</span>
+                    <button
+                      onClick={handleThemeChange}
+                      className="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors duration-300 focus:outline-none"
+                    >
+                      <div className="absolute inset-0 flex items-center justify-between px-1.5">
+                        <Sun className="w-4 h-4 text-yellow-500" />
+                        <Moon className="w-4 h-4 text-primary-400" />
+                      </div>
+                      <div
+                        className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                          theme === 'dark' ? 'translate-x-7' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  
+                  <button 
+                    className="flex items-center space-x-3 w-full text-left text-gray-700 hover:bg-red-50 hover:text-red-600 dark:text-gray-300 dark:hover:bg-red-900/20 dark:hover:text-red-400 px-3 py-3 rounded-lg transition-colors" 
+                    onClick={async () => { await supabase.auth.signOut(); setIsMobileMenuOpen(false); navigate("/"); }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span className="font-medium">Sair</span>
+                  </button>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
     </>
   );
 }

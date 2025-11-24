@@ -8,8 +8,6 @@ import {
   ChevronDown,
   Sun,
   Moon,
-  CheckCircle,
-  Award,
   HelpCircle
 } from "lucide-react";
 import type { SlideHeaderProps } from "@/types";
@@ -21,8 +19,6 @@ export function SlideHeader({
   onPrevious,
   onNext,
   onExit,
-  onNavigateToQuiz,
-  onNavigateToChallenge,
   canGoNext,
   canGoPrevious
 }: SlideHeaderProps) {
@@ -61,7 +57,6 @@ export function SlideHeader({
     setTheme(newTheme);
     applyTheme(newTheme);
     setIsThemeMenuOpen(false);
-    // Não recarrega mais - o tema é aplicado dinamicamente
   };
 
   const currentSlide = slideDeck.slides[slideDeck.currentSlideIndex];
@@ -149,18 +144,18 @@ export function SlideHeader({
                 <span className="hidden sm:inline">Sair</span>
               </button>
               
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white break-words whitespace-normal">
+              <div className="block max-w-[150px] sm:max-w-none">
+                <h1 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white break-words whitespace-normal line-clamp-2 sm:line-clamp-none leading-tight">
                   {slideDeck.title}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                   {currentSlide?.title}
                 </p>
               </div>
             </div>
 
             {/* Centro: Indicador de slides */}
-            <div className="flex items-center justify-center">
+            <div className="hidden sm:flex items-center justify-center">
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
                   {slideIndicator}
@@ -177,7 +172,7 @@ export function SlideHeader({
               <button
                 onClick={onPrevious}
                 disabled={!canGoPrevious}
-                className={`btn-outline flex items-center space-x-1 px-3 py-2 ${
+                className={`btn-outline hidden md:flex items-center space-x-1 px-3 py-2 ${
                   !canGoPrevious ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
                 title="Slide anterior"
@@ -189,7 +184,7 @@ export function SlideHeader({
               <button
                 onClick={onNext}
                 disabled={!canGoNext}
-                className={`btn-outline flex items-center space-x-1 px-3 py-2 ${
+                className={`btn-outline hidden md:flex items-center space-x-1 px-3 py-2 ${
                   !canGoNext ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
                 title="Próximo slide"
@@ -200,29 +195,6 @@ export function SlideHeader({
 
               {/* Separador */}
               <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-
-              {/* Botões de navegação para seções */}
-              {false && (
-                <div className="hidden sm:flex items-center space-x-2">
-                  <button
-                    onClick={onNavigateToQuiz}
-                    className="btn-outline flex items-center space-x-1 px-3 py-2"
-                    title="Ir para Quiz"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Quiz</span>
-                  </button>
-
-                  <button
-                    onClick={onNavigateToChallenge}
-                    className="btn-outline flex items-center space-x-1 px-3 py-2"
-                    title="Ir para Desafio"
-                  >
-                    <Award className="h-4 w-4" />
-                    <span>Desafio</span>
-                  </button>
-                </div>
-              )}
 
               {/* Botão de ajuda */}
               <button
@@ -263,31 +235,6 @@ export function SlideHeader({
           </div>
         </div>
       </header>
-
-      {/* Menu mobile flutuante */}
-      {false && (
-        <div className="sm:hidden fixed bottom-4 left-4 right-4 z-[12000] flex justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 flex space-x-2">
-            <button
-              onClick={onNavigateToQuiz}
-              className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
-              title="Ir para Quiz"
-            >
-              <CheckCircle className="h-4 w-4" />
-              <span>Quiz</span>
-            </button>
-
-            <button
-              onClick={onNavigateToChallenge}
-              className="btn-outline flex items-center space-x-1 px-3 py-2 text-sm"
-              title="Ir para Desafio"
-            >
-              <Award className="h-4 w-4" />
-              <span>Desafio</span>
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

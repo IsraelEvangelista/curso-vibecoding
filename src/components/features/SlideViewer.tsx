@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SlideDeck } from '../../types';
 import { ComparisonCards } from './ComparisonCards';
@@ -205,8 +205,6 @@ export function SlideViewer({
 
   const handleExit = useCallback(() => {
     onExit();
-    // Removido navigate('/aulas') pois onExit já gerencia a navegação
-    // e a rota /aulas não existe, causando erro 404
   }, [onExit]);
 
   const handleNavigateToQuiz = useCallback(() => {
@@ -219,12 +217,9 @@ export function SlideViewer({
     navigate(`/aula/${slideDeck.lessonId}/desafio`);
   }, [onNavigateToChallenge, navigate, slideDeck.lessonId]);
 
-  
-
   // Navegação com teclado
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Permitir scroll com setas quando não estiver em inputs
       const activeElement = document.activeElement;
       const isInput = activeElement && (
         activeElement.tagName === 'INPUT' ||
@@ -251,9 +246,7 @@ export function SlideViewer({
             handleExit();
           }
           break;
-        // Permitir scroll natural com setas em inputs
         default:
-          // Não bloquear outras teclas
           break;
       }
     };
@@ -264,36 +257,105 @@ export function SlideViewer({
 
   // Garantir que o scroll funcione mesmo após interações com modais
   useEffect(() => {
-    // Restaurar overflow do body se necessário
     const checkAndRestoreScroll = () => {
-      // Verificar se não há modais abertos (baseado na ausência de elementos com z-index alto)
       const modalsAbertos = document.querySelectorAll('[role="dialog"], .modal-overlay');
       if (document.body.style.overflow === 'hidden' && modalsAbertos.length === 0) {
         document.body.style.overflow = '';
       }
     };
-
-    // Verificar periodicamente (como fallback)
     const interval = setInterval(checkAndRestoreScroll, 200);
-
     return () => clearInterval(interval);
   }, []);
 
-  
+  // Gestos de swipe usando useRef para evitar re-renders
+  const touchStart = useRef<{ x: number, y: number } | null>(null);
+  const touchEnd = useRef<{ x: number, y: number } | null>(null);
+  const isDragging = useRef<boolean>(false);
+  const minSwipeDistance = 50;
+
+  // Touch Handlers
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchEnd.current = null;
+    touchStart.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEnd.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    };
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart.current || !touchEnd.current) return;
+    handleSwipeGesture();
+  };
+
+  // Mouse Handlers (for desktop testing)
+  const onMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    touchEnd.current = null;
+    touchStart.current = {
+      x: e.clientX,
+      y: e.clientY
+    };
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    touchEnd.current = {
+      x: e.clientX,
+      y: e.clientY
+    };
+  };
+
+  const onMouseUp = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    handleSwipeGesture();
+  };
+
+  const onMouseLeave = () => {
+    if (isDragging.current) {
+      isDragging.current = false;
+      // Optional: trigger swipe if they drag out of window, but usually better to cancel
+    }
+  };
+
+  const handleSwipeGesture = () => {
+    if (!touchStart.current || !touchEnd.current) return;
+    
+    const distanceX = touchStart.current.x - touchEnd.current.x;
+    const distanceY = touchStart.current.y - touchEnd.current.y;
+    
+    // Se o movimento vertical for maior que o horizontal, é scroll, ignorar
+    if (Math.abs(distanceY) > Math.abs(distanceX)) return;
+
+    const isLeftSwipe = distanceX > minSwipeDistance;
+    const isRightSwipe = distanceX < -minSwipeDistance;
+
+    if (isLeftSwipe && canGoNext) {
+      handleNext();
+    }
+    
+    if (isRightSwipe && canGoPrevious) {
+      handlePrevious();
+    }
+  };
 
   // Renderizar conteúdo do slide baseado no tipo
   const renderSlideContent = () => {
     if (!currentSlide) return null;
 
-    // Renderização especial para o slide de comparação GLM 4.6 vs MiniMax M2
     if (currentSlide.id === 'aula3-slide2') {
       return <ComparisonCards />;
     }
 
-    // Renderização especial para o slide 03 — força grid 2 colunas sem interferência de "prose"
     if (currentSlide.id === 'aula3-slide3' && typeof currentSlide.content === 'string') {
       const slideContentText = currentSlide.content;
-      // Reaproveita o processamento de tabelas e formatação básica
       const processed = (() => {
         const removeAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         const stripLeadingTitle = (content: string, title?: string) => {
@@ -309,12 +371,7 @@ export function SlideViewer({
           return content;
         };
         const escapeHtml = (str: string) =>
-          str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+          str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
         let text = stripLeadingTitle(slideContentText, currentSlide.title);
         const codeBlocks: { lang: string; code: string }[] = [];
@@ -323,7 +380,6 @@ export function SlideViewer({
           return `__CODEBLOCK_${idx}__`;
         });
 
-        // Tabelas (definição local para evitar ordem de inicialização)
         const processMarkdownTableLocal = (content: string): string => {
           const lines = content.split('\n');
           let html = '';
@@ -343,9 +399,7 @@ export function SlideViewer({
                 html += '<table class="min-w-full border-collapse border border-gray-300 dark:border-gray-700 my-4">';
                 tableRows.forEach((row, idx) => {
                   const cells = row.split('|').filter(cell => cell.trim());
-                  if (cells.every(cell => /^[\s:-]+$/.test(cell))) {
-                    return;
-                  }
+                  if (cells.every(cell => /^[\s:-]+$/.test(cell))) return;
                   const isHeader = idx === 0;
                   const tag = isHeader ? 'th' : 'td';
                   const cellClass = isHeader
@@ -367,13 +421,9 @@ export function SlideViewer({
           return html;
         };
         text = processMarkdownTableLocal(text);
-
-        // Inline code
         text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
           `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
         );
-
-        // Headings, listas, citações, bold/italic
         text = text
           .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
           .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
@@ -383,8 +433,6 @@ export function SlideViewer({
           .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
           .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
           .replace(/\n\n/g, '<br><br>');
-
-        // Restaurar code blocks
         text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
           const { lang, code } = codeBlocks[Number(i)];
           return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
@@ -392,17 +440,13 @@ export function SlideViewer({
         return text;
       })();
 
-      // Importante: sem classe "prose" para não interferir no grid; container com estilo inline garantindo 2 colunas
       return (
         <div className="max-w-none">
-          <div
-            dangerouslySetInnerHTML={{ __html: processed }}
-          />
+          <div dangerouslySetInnerHTML={{ __html: processed }} />
         </div>
       );
     }
 
-    // Função para processar tabelas markdown
     const processMarkdownTable = (content: string): string => {
       const lines = content.split('\n');
       let html = '';
@@ -411,42 +455,29 @@ export function SlideViewer({
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
-        
-        // Detectar linha de tabela (contém |)
         if (line.startsWith('|') && line.endsWith('|')) {
           if (!inTable) {
             inTable = true;
             tableRows = [];
           }
           tableRows.push(line);
-          
-          // Verificar se próxima linha não é tabela ou é última linha
           const nextLine = i < lines.length - 1 ? lines[i + 1].trim() : '';
           if (!nextLine.startsWith('|') || i === lines.length - 1) {
-            // Processar tabela completa
             html += '<table class="min-w-full border-collapse border border-gray-300 dark:border-gray-700 my-4">';
-            
             tableRows.forEach((row, idx) => {
               const cells = row.split('|').filter(cell => cell.trim());
-              
-              // Ignorar linha separadora (contém apenas - e :)
-              if (cells.every(cell => /^[\s:-]+$/.test(cell))) {
-                return;
-              }
-              
+              if (cells.every(cell => /^[\s:-]+$/.test(cell))) return;
               const isHeader = idx === 0;
               const tag = isHeader ? 'th' : 'td';
               const cellClass = isHeader 
                 ? 'border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-semibold text-left'
                 : 'border border-gray-300 dark:border-gray-700 px-4 py-2';
-              
               html += '<tr>';
               cells.forEach(cell => {
                 html += `<${tag} class="${cellClass}">${cell.trim()}</${tag}>`;
               });
               html += '</tr>';
             });
-            
             html += '</table>';
             inTable = false;
           }
@@ -454,7 +485,6 @@ export function SlideViewer({
           html += line + '\n';
         }
       }
-      
       return html;
     };
 
@@ -470,12 +500,10 @@ export function SlideViewer({
                 <div
                   dangerouslySetInnerHTML={{
                     __html: (() => {
-                      const removeAccents = (str: string) =>
-                        str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                      const removeAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                       const stripLeadingTitle = (content: string, title?: string) => {
                         if (!title) return content;
-                        const norm = (s: string) =>
-                          removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                        const norm = (s: string) => removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
                         const trimmed = content.replace(/^\s+/, '');
                         const firstLine = trimmed.split('\n')[0] || '';
                         const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
@@ -486,12 +514,7 @@ export function SlideViewer({
                         return content;
                       };
                       const escapeHtml = (str: string) =>
-                        str
-                          .replace(/&/g, '&amp;')
-                          .replace(/</g, '&lt;')
-                          .replace(/>/g, '&gt;')
-                          .replace(/"/g, '&quot;')
-                          .replace(/'/g, '&#39;');
+                        str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
                       let text = stripLeadingTitle(content.text, currentSlide.title);
                       const codeBlocks: { lang: string; code: string }[] = [];
@@ -539,12 +562,10 @@ export function SlideViewer({
             <div 
               dangerouslySetInnerHTML={{
                 __html: (() => {
-                  const removeAccents = (str: string) =>
-                    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                  const removeAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                   const stripLeadingTitle = (content: string, title?: string) => {
                     if (!title) return content;
-                    const norm = (s: string) =>
-                      removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                    const norm = (s: string) => removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
                     const trimmed = content.replace(/^\s+/, '');
                     const firstLine = trimmed.split('\n')[0] || '';
                     const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
@@ -555,14 +576,8 @@ export function SlideViewer({
                     return content;
                   };
                   const escapeHtml = (str: string) =>
-                    str
-                      .replace(/&/g, '&amp;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;')
-                      .replace(/"/g, '&quot;')
-                      .replace(/'/g, '&#39;');
+                    str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-                  // Extract code fences to placeholders
                   const contentText = typeof currentSlide.content === 'string' ? currentSlide.content : '';
                   let text = stripLeadingTitle(contentText, currentSlide.title);
                   const codeBlocks: { lang: string; code: string }[] = [];
@@ -570,16 +585,10 @@ export function SlideViewer({
                     const idx = codeBlocks.push({ lang, code }) - 1;
                     return `__CODEBLOCK_${idx}__`;
                   });
-
-                  // Tables
                   text = processMarkdownTable(text);
-
-                  // Inline code with escaping
                   text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
                     `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
                   );
-
-                  // Headings, lists, quotes, bold
                   text = text
                     .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
                     .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-semibold mb-3">$1</h2>')
@@ -588,13 +597,10 @@ export function SlideViewer({
                     .replace(/^> (.*)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-blue-600 dark:text-blue-400">$1</blockquote>')
                     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
                     .replace(/\n\n/g, '<br><br>');
-
-                  // Restore code blocks safely escaped
                   text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                     const { lang, code } = codeBlocks[Number(i)];
                     return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
                   });
-
                   return text;
                 })()
               }}
@@ -609,12 +615,10 @@ export function SlideViewer({
             <div 
               dangerouslySetInnerHTML={{
                 __html: (() => {
-                  const removeAccents = (str: string) =>
-                    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                  const removeAccents = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
                   const stripLeadingTitle = (content: string, title?: string) => {
                     if (!title) return content;
-                    const norm = (s: string) =>
-                      removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
+                    const norm = (s: string) => removeAccents(s).replace(/[^\w\s]/g, '').trim().toLowerCase();
                     const trimmed = content.replace(/^\s+/, '');
                     const firstLine = trimmed.split('\n')[0] || '';
                     const headingText = firstLine.replace(/^#{1,6}\s*/, '').trim();
@@ -625,14 +629,8 @@ export function SlideViewer({
                     return content;
                   };
                   const escapeHtml = (str: string) =>
-                    str
-                      .replace(/&/g, '&amp;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;')
-                      .replace(/"/g, '&quot;')
-                      .replace(/'/g, '&#39;');
+                    str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-                  // Extract code fences to placeholders
                   const slideContentText = typeof currentSlide.content === 'string' ? currentSlide.content : '';
                   let text = stripLeadingTitle(slideContentText, currentSlide.title);
                   const codeBlocks: { lang: string; code: string }[] = [];
@@ -640,16 +638,10 @@ export function SlideViewer({
                     const idx = codeBlocks.push({ lang, code }) - 1;
                     return `__CODEBLOCK_${idx}__`;
                   });
-
-                  // Tables
                   text = processMarkdownTable(text);
-
-                  // Inline code with escaping
                   text = text.replace(/`([^`]+)`/g, (_m: string, c: string) =>
                     `<code class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded text-sm">${escapeHtml(c)}</code>`
                   );
-
-                  // Headings, lists, quotes, bold/italic
                   text = text
                     .replace(/^# (.*$)/gm, '<h1 class="text-4xl font-bold mb-6 text-gray-900 dark:text-white">$1</h1>')
                     .replace(/^## (.*$)/gm, '<h2 class="text-3xl font-semibold mb-4 text-gray-800 dark:text-gray-100">$1</h2>')
@@ -659,13 +651,10 @@ export function SlideViewer({
                     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-white">$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700 dark:text-gray-200">$1</em>')
                     .replace(/\n\n/g, '<br><br>');
-
-                  // Restore code blocks safely escaped
                   text = text.replace(/__CODEBLOCK_(\d+)__/g, (_m: string, i: string) => {
                     const { lang, code } = codeBlocks[Number(i)];
                     return `<pre class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto"><code class="language-${lang} text-gray-900 dark:text-gray-100">${escapeHtml(code)}</code></pre>`;
                   });
-
                   return text;
                 })()
               }}
@@ -676,7 +665,17 @@ export function SlideViewer({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000]">
+    <div 
+      className="min-h-screen bg-white dark:bg-[#000000]"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseLeave}
+      style={{ touchAction: 'pan-y' }}
+    >
       {/* Header fixo */}
       <SlideHeader
         slideDeck={slideDeck}
@@ -702,7 +701,7 @@ export function SlideViewer({
             </div>
 
             {/* Conteúdo do slide */}
-            <div className="slide-content flex-1 overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain' }}>
+            <div className="slide-content flex-1 overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
               {currentSlide?.image ? (
                 <div className="flex flex-col md:flex-row gap-6 items-start">
                   {/* Conteúdo à esquerda */}
